@@ -1,0 +1,32 @@
+{
+    "id": "EF2B000A",
+    "path": null,
+    "project_path": null,
+    "type": "r_dataframe",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1614204098246.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "expression": "otu_metrics",
+        "caption": "otu_metrics",
+        "totalObservations": "495",
+        "displayedObservations": "495",
+        "variables": "10",
+        "cacheKey": "F650F385",
+        "object": "otu_metrics",
+        "environment": "",
+        "contentUrl": "grid_resource/gridviewer.html?env=&obj=otu_metrics&cache_key=F650F385&max_cols=50",
+        "preview": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 28548196644945944,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1614204098246,
+    "read_only": false,
+    "read_only_alternatives": []
+}
