@@ -1,0 +1,32 @@
+{
+    "id": "9B1C7854",
+    "path": null,
+    "project_path": null,
+    "type": "r_dataframe",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1612999262358.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "expression": "penguin_haplos",
+        "caption": "penguin_haplos",
+        "totalObservations": "21",
+        "displayedObservations": "21",
+        "variables": "8",
+        "cacheKey": "F7CB498E",
+        "object": "penguin_haplos",
+        "environment": "",
+        "contentUrl": "grid_resource/gridviewer.html?env=&obj=penguin_haplos&cache_key=F7CB498E&max_cols=50",
+        "preview": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 123145392332025,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1612999262358,
+    "read_only": false,
+    "read_only_alternatives": []
+}

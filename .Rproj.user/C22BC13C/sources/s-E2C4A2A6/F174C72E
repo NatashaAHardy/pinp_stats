@@ -1,0 +1,27 @@
+{
+    "id": "F174C72E",
+    "path": "~/Documents/Professional/WORK/PINP/PINP DATA/pinp_stats/R/PINP_Birds.Rmd",
+    "project_path": "R/PINP_Birds.Rmd",
+    "type": "r_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1612391439168.0,
+    "source_on_save": false,
+    "relative_order": 3,
+    "properties": {
+        "cursorPosition": "1245,12",
+        "last_setup_crc32": "",
+        "scrollLine": "0",
+        "tempName": "Untitled1",
+        "working_dir": "current"
+    },
+    "folds": "10|39|14|0|\n30|16|68|0|\n70|12|107|0|\n72|16|106|0|\n131|21|152|0|\n154|31|179|0|\n181|27|203|0|\n205|34|225|0|\n227|30|250|0|\n252|23|309|0|\n260|13|274|0|\n311|24|347|0|\n349|25|374|0|\n376|18|384|0|\n386|21|393|0|\n395|22|427|0|\n429|31|450|0|\n452|38|510|0|\n514|21|877|0|\n518|41|560|0|\n562|44|605|0|\n607|37|637|0|\n639|45|690|0|\n692|48|741|0|\n743|37|770|0|\n772|44|804|0|\n806|47|854|0|\n856|47|876|0|\n883|26|906|0|\n908|46|946|0|\n948|47|983|0|\n985|57|1040|0|\n1043|37|1080|0|\n1083|54|1123|0|\n1125|59|1189|0|\n1303|23|1341|0|\n1314|32|1340|0|\n1342|14|1540|0|\n1541|17|1671|0|\n",
+    "lastKnownWriteTime": 1613093990,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1613093990555,
+    "read_only": false,
+    "read_only_alternatives": []
+}

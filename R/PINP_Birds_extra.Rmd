@@ -1,0 +1,247 @@
+---
+title: "PINP_Birds_extra"
+author: "Natasha Hardy"
+date: "1/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### DO NOT USE THESE ANALYSES
+```{r GLMM Bird 2 --> detection ~ metric+(1|location)+(1|time_id)}
+
+# Won't be using this. Not enough random groups.
+unique(bird_master_test$location) #3
+unique(bird_master_test$time_id) #4
+#Technically this is not enough for a random factor, needs >5.
+
+#The following model includes a random factor of time 
+bird_model_2 <- glmer(detection ~ metric+(1|location)+(1|time_id), family = binomial, data = bird_master_test)
+anova(bird_model_2, test = "Chisq")
+summary(bird_model_med2)
+
+#Analysis of Variance Table
+#       Df Sum Sq Mean Sq F value
+#metric  1 1.2728  1.2728  1.2728
+#Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+#Family: binomial  ( logit )
+#Formula: detection ~ metric + (1 | location) + (1 | time_id)
+#Data: bird_master_test
+
+#     AIC      BIC   logLik deviance df.resid 
+#   166.2    178.2    -79.1    158.2      146 
+
+#Scaled residuals: 
+#    Min      1Q  Median      3Q     Max 
+#-0.7409 -0.5720 -0.4547 -0.3903  2.5618 
+
+#Random effects:
+# Groups   Name        Variance Std.Dev.
+# time_id  (Intercept) 0.1377   0.3711  
+# location (Intercept) 0.1561   0.3950  
+#Number of obs: 150, groups:  time_id, 4; location, 3
+
+#Fixed effects:
+#            Estimate Std. Error z value Pr(>|z|)  
+#(Intercept)  -1.0702     0.5302  -2.019   0.0435 *
+#metricdna    -0.4591     0.4085  -1.124   0.2611  
+
+#Correlation of Fixed Effects:
+#          (Intr)
+#metricdna -0.460
+
+```
+
+```{r GLMM Bird 3a --> detection ~ group_id/metric}
+summary(bird_master_test)
+#Additional models
+# We don't want metric alone because metric is nested within location
+#bird_model_2 <- glm(detection ~ metric, family = binomial, data = bird_master_test)
+#anova(bird_model_2, test = "Chisq")
+#summary(bird_model_2)
+
+bird_model_3a <- glm(detection ~ group_id/metric, family = binomial, data = bird_master_test)
+anova(bird_model_3a, test = "Chisq")
+summary(bird_model_3a)
+#Call:
+#glm(formula = detection ~ group_id/metric, family = binomial, data = bird_master_test)
+
+#                Df Deviance Resid. Df Resid. Dev Pr(>Chi)  
+#NULL                               99     122.17           
+#group_id         6   14.841        93     107.33  0.02153 *
+#group_id:metric  7   11.701        86      95.63  0.11082  
+
+
+#Deviance Residuals: 
+#     Min        1Q    Median        3Q       Max  
+#-1.01077  -0.84460  -0.51678  -0.00022   2.44775  
+
+#Coefficients:
+#                              Estimate Std. Error z value Pr(>|z|)
+#(Intercept)                 -5.108e-01  7.303e-01  -0.699    0.484
+#group_idCB_Jan_17           -8.755e-01  1.076e+00  -0.813    0.416
+#group_idCB_Sep_15            1.808e+01  1.978e+03   0.009    0.993
+#group_idCB_Sep_16           -1.281e+00  1.304e+00  -0.982    0.326
+#group_idGI_Jan_17           -1.099e+00  1.317e+00  -0.834    0.404
+#group_idMI_Jan_17            1.054e-01  1.169e+00   0.090    0.928
+#group_idMI_Sep_16           -1.686e+00  1.282e+00  -1.315    0.188
+#group_idCB_Jan_16:metricdna -2.776e-01  9.079e-01  -0.306    0.760
+#group_idCB_Jan_17:metricdna  5.390e-01  9.290e-01   0.580    0.562
+#group_idCB_Sep_15:metricdna -1.951e+01  1.978e+03  -0.010    0.992
+#group_idCB_Sep_16:metricdna  4.925e-01  1.261e+00   0.390    0.696
+#group_idGI_Jan_17:metricdna -1.596e+01  1.142e+03  -0.014    0.989
+#group_idMI_Jan_17:metricdna -2.000e-15  1.118e+00   0.000    1.000
+#group_idMI_Sep_16:metricdna -7.472e-01  1.471e+00  -0.508    0.611
+
+#(Dispersion parameter for binomial family taken to be 1)
+
+#    Null deviance: 160.57  on 149  degrees of freedom
+#Residual deviance: 131.26  on 136  degrees of freedom
+#AIC: 159.26
+#Number of Fisher Scoring iterations: 16
+```
+
+```{r GLMM Bird 3b --> detection ~ metric/group_id}
+bird_model_3b <- glm(detection ~ metric/group_id, family = binomial, data = bird_master_test)
+anova(bird_model_3b, test = "Chisq")
+summary(bird_model_3b)
+
+#Call:
+#glm(formula = detection ~ metric/group_id, family = binomial, data = bird_master_test)
+
+#                Df Deviance Resid. Df Resid. Dev Pr(>Chi)   
+#NULL                               99     122.17            
+#metric           1   0.1906        98     121.98 0.662432   
+#metric:group_id 12  26.3523        86      95.63 0.009567 **
+  
+#Deviance Residuals: 
+#     Min        1Q    Median        3Q       Max  
+#-1.01077  -0.84460  -0.51678  -0.00022   2.44775  
+
+#Coefficients:
+#                              Estimate Std. Error z value Pr(>|z|)  
+#(Intercept)                   -0.51083    0.73030  -0.699   0.4843  
+#metricdna                     -0.27763    0.90788  -0.306   0.7598  
+#metrichp:group_idCB_Jan_17    -0.87547    1.07626  -0.813   0.4160  
+#metricdna:group_idCB_Jan_17   -0.05884    0.72733  -0.081   0.9355  
+#metrichp:group_idCB_Sep_15    18.07689 1978.09030   0.009   0.9927  
+#metricdna:group_idCB_Sep_15   -1.15745    1.19740  -0.967   0.3337  
+#metrichp:group_idCB_Sep_16    -1.28093    1.30384  -0.982   0.3259  
+#metricdna:group_idCB_Sep_16   -0.51083    0.84567  -0.604   0.5458  
+#metrichp:group_idGI_Jan_17    -1.09861    1.31656  -0.834   0.4040  
+#metricdna:group_idGI_Jan_17  -16.77761 1142.05102  -0.015   0.9883  
+#metrichp:group_idMI_Jan_17     0.10536    1.16905   0.090   0.9282  
+#metricdna:group_idMI_Jan_17    0.38299    0.84118   0.455   0.6489  
+#metrichp:group_idMI_Sep_16    -1.68640    1.28236  -1.315   0.1885  
+#metricdna:group_idMI_Sep_16   -2.15598    1.15911  -1.860   0.0629 .
+#    Null deviance: 122.17  on 99  degrees of freedom
+#Residual deviance:  95.63  on 86  degrees of freedom
+#AIC: 123.63
+
+#Number of Fisher Scoring iterations: 16
+```
+
+```{r GLMM Bird 4 --> detection ~ metric + (1|group_id)}
+bird_model_4 <- glmer(detection ~ metric+(1|group_id), family = binomial, data = bird_master_test)
+anova(bird_model_4, test = "Chisq")
+summary(bird_model_4)
+
+#Analysis of Variance Table
+#       Df  Sum Sq Mean Sq F value
+#metric  1 0.21117 0.21117  0.2112
+
+#Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) ['glmerMod']
+# Family: binomial  ( logit )
+#Formula: detection ~ metric + (1 | group_id)
+#   Data: bird_master_test
+
+#     AIC      BIC   logLik deviance df.resid 
+#   125.8    133.7    -59.9    119.8       97 
+
+#Scaled residuals: 
+#    Min      1Q  Median      3Q     Max 
+#-0.9224 -0.7146 -0.4922  1.2057  2.2514 
+
+#Random effects:
+# Groups   Name        Variance Std.Dev.
+# group_id (Intercept) 0.4022   0.6342  
+#Number of obs: 100, groups:  group_id, 7
+
+#Fixed effects:
+#            Estimate Std. Error z value Pr(>|z|)  
+#(Intercept)  -0.9803     0.4097  -2.393   0.0167 *
+#metricdna     0.2055     0.4521   0.455   0.6495  
+
+#Correlation of Fixed Effects:
+#          (Intr)
+#metricdna -0.574
+
+#Plot residuals
+plot(bird_model_med)
+
+##Model check
+#Overdispersion
+E1 <- resid(bird_model_med, type = "pearson")
+Overdispersion <- sum(E1^2) / bird_model_med2$df.res #df.res = N-p
+Overdispersion #0.943662 GREAT!
+
+#Normality
+hist(E1, breaks = 10) #NOT NORMAL
+
+#Non-linearity?
+#Check bar or boxplots
+
+```
+
+```{r GLMM Bird --> model comparison and selection}
+
+drop1(bird_model_1)
+
+#Model comparison
+#These were all very similar in deviance explained/added by terms.
+
+#Compare single effect to crossed terms model:
+anova(bird_model_0, bird_model_1)
+#Model 1: detection ~ metric
+#Model 2: detection ~ metric * group_id
+#  Resid. Df Resid. Dev Df Deviance
+#1        98     121.98            
+#2        86      95.63 12   26.352
+
+#Compare single effect to crossed terms model:
+anova(bird_model_0, bird_model_1b)
+#Model 1: detection ~ metric
+#Model 2: detection ~ metric + group_id
+#  Resid. Df Resid. Dev Df Deviance
+#1        98     121.98            
+#2        92     107.11  6   14.872
+
+#Does not compute between GLMM and GLM objects.
+anova(bird_model_1, bird_model_3a, bird_model_3b)
+#Model 1: detection ~ metric * group_id
+#Model 2: detection ~ group_id/metric
+#Model 3: detection ~ metric/group_id
+#  Resid. Df Resid. Dev Df Deviance
+#1        86      95.63            
+#2        86      95.63  0        0
+#3        86      95.63  0        0
+
+anova(bird_model_2, bird_model_4)
+#Models:
+#bird_model_4: detection ~ metric + (1 | group_id)
+#bird_model_2: detection ~ metric + (1 | location) + (1 | time_id)
+#             Df    AIC    BIC  logLik deviance  Chisq Chi Df Pr(>Chisq)
+#bird_model_4  3 125.85 133.66 -59.924   119.85                         
+#bird_model_2  4 127.66 138.08 -59.828   119.66 0.1924      1     0.6609
+
+```
+
+```{r GLM Model validation}
+par(mfrow = c(2, 2))
+plot(M3)
+
+```
+

@@ -1,0 +1,615 @@
+---
+title: "PINP_Bird_detection"
+author: "Natasha Hardy"
+date: "December 2, 2019"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r Setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Users/natasha/Documents/Professional/WORK/CURRENT JOBS/PINP/PINP DATA/pinp_stats/data")
+#change root.dir ="" to your working directory
+```
+
+## PINP Bird Detections
+
+This R markdown includes data analyses and visualisations for the bird detections project. 
+Predator species: long-nosed fur seals; samples: scats;
+Locations: Cape Bridgewater, Montague Island, Gabo Island and Lady Julia Percy
+Sample collection dates: 2015-2017
+
+Project objective: to compare the detection rates of birds in long-nose fur seal scats across the range of this predator in SE Australia from Bass Strait to southern NSW, and over multiple seasons.
+
+```{r Workspace}
+
+#checking that my setup chunk works, it's been a PIA lately, may need to update to latest versions of R and RStudio...lame
+
+getwd()
+
+# Packages
+
+#Load
+library(tidyverse)
+library(tidyr)
+#library(reshape)
+library(reshape2)
+library(plyr)
+library(dplyr)
+library(PNWColors)
+library(lattice)
+
+#Note that loading all these packages is hell because of overlap in functions, some packages being superceded but still requiring each other or requiring functions from one package to another. You'll notice I had to force a lot of functions by calling the package as follows 
+#data %>% package::function(etc)
+
+```
+
+```{r Load data}
+
+# Bird detections data from four export pivot table tabs as .csv
+#https://docs.google.com/spreadsheets/d/1D6EqzmLSjwK2ENXtqOLQHwNu65CnmqUDlcJg-lPaZMI/edit#gid=1310896506
+#Sometimes Rmd plays up with the setup chunk and you may need to force entry to the data using:
+#read.csv("/Users/natasha/Documents/Professional/WORK/CURRENT JOBS/PINP/PINP DATA/pinp_stats/data/bird_detection.csv", header=TRUE)
+
+#1 = "bird_detect_med" tab
+birdD_wide_med <- read.csv("/Users/natasha/Documents/Professional/WORK/CURRENT JOBS/PINP/PINP DATA/pinp_stats/data/bird_detect_med.csv", header=TRUE)
+str(birdD_wide_med)
+
+#2 = "bird_detect_high" tab
+birdD_wide_high <- read.csv("/Users/natasha/Documents/Professional/WORK/CURRENT JOBS/PINP/PINP DATA/pinp_stats/data/bird_detect_high.csv", header=TRUE)
+
+#3 = "penguin_detect_med" tab
+penguin_wide_med <- read.csv("/Users/natasha/Documents/Professional/WORK/CURRENT JOBS/PINP/PINP DATA/pinp_stats/data/penguin_detect_med.csv", header=TRUE)
+
+#4 = "penguin_detect_high" tab
+penguin_wide_high <- read.csv("/Users/natasha/Documents/Professional/WORK/CURRENT JOBS/PINP/PINP DATA/pinp_stats/data/penguin_detect_high.csv", header=TRUE)
+
+```
+
+## Data manipulations
+
+I chose to input data as columns in the master document tab "BIRD_DATA" in PINP_BIRD_DATA.xlsx on GoogleDrive. This is because many columns were calculated based off other columns (such as medium stringency DNA OTU total abundance used to calculate a 1% cut-off for high stringency DNA OTU columns). This means a little data wrangling on this end to merge these data into long-form for analyses and graphing.
+
+For the following manipulations, I'm going to:
+(i) Rename colnames for each of the four datasets exported, 
+(ii) Transform from wide to long data, using melt(), and include arguments for renaming the output variable and value to "metric" and "detection", and
+(iii) Add a categorical descriptor for each method, to later merge datasets 1+2 (bird detections) and 3+4 (penguin detections)
+
+Columns are renamed as follows:
+hp = hard-part analysis to ID prey
+dna = DNA metabarcoding to ID prey
+dna_or_hp = detections using either method
+both_methods = both detected birds/penguins
+same_taxon = both detected the same bird taxon (for bird only, as "both" and "same" are equal for looking at one taxon such as penguins)
+
+Then add descriptor:
+medium = standard QC for DNA based analysis
+high = additional exclusion of trace amounts of DNA that passed QC
+
+```{r Hard part data}
+
+# 0 hard part data string separate
+hard_part_bird = birdD_wide_med %>%
+  select(my_data, location, louse_stage)
+```
+
+
+```{r Data 1: Bird medium stringency}
+
+## 1 Bird detections using medium stringency DNA QC + hard-parts
+#Piping multiple steps
+
+#str(birdD_wide_med)
+#colnames(birdD_wide_med)
+
+birdD_med = birdD_wide_med %>% 
+  dplyr::rename(hp = `SUM.of.allbirds_HP`, dna = `SUM.of.dna_stringency_med`,
+                dna_or_hp = `SUM.of.dna_or_hp`, both_methods = `SUM.of.both_bird`, 
+                same_taxon = `SUM.of.both_sametaxa`) %>%
+  #Renamed columns
+  reshape2::melt(id.vars=c("sample_id", "location_id", "location", "time_id", "group_id"), variable.name = "metric", value.name = "detection") %>%
+  #Transform wide to long data, using melt(), and added arguments for renaming the output variable and value to "metric" and "detection"
+  #mutate(dna_qc = "medium") %>%
+  #Added the character vector/factor for merging with the high stringency data
+ mutate(method = if_else(birdD_med$metric == "hp", "hard part", "DNA standard QC"))
+#birdD_med2 = birdD_med %>% 
+#   dplyr::mutate(method = case_when(birdD_med$metric == `hp` ~ `hard part`,
+#                            birdD_med$metric == c(`dna`, `dna_or_hp`, `both_methods`, #`same_taxon`) ~ `DNA standard QC`))
+
+#Looking good:
+str(birdD_med)
+unique(birdD_med$metric)
+
+```
+
+```{r Data 2: Bird high stringency}
+
+## 2 Bird detections using high stringency DNA QC + hard-parts
+#Piping multiple steps
+
+#colnames(birdD_wide_high)
+#need to check and change for column names from this document
+birdD_high
+birdD_high = birdD_wide_high %>% 
+  dplyr::rename(hp = `SUM.of.allbirds_hp`, dna = `SUM.of.allbirds_dna_high`, 
+                dna_or_hp = `SUM.of.allbirds_high_dna_or_hp`, 
+                both_methods = `SUM.of.allbirds_high_both`, 
+                same_taxon = `SUM.of.allbirds_high_same`) %>%
+  #Renamed columns
+  reshape2::melt(id.vars=c("sample_id", "location_id", "location", "time_id", "group_id"), variable.name = "metric", value.name = "detection") %>%
+  #Transform wide to long data, using melt(), and added arguments for renaming the output variable and value to "metric" and "detection"
+  filter(metric != "hp") %>% #here I'm removing the repeated subset of data on hard-part analysis for graphing
+  mutate(method = "DNA stringent QC")
+
+#Looking good:
+str(birdD_high)
+
+```
+
+```{r Data 3: Penguin medium stringency}
+
+## 2 Bird detections using high stringency DNA QC + hard-parts
+#Piping multiple steps
+
+#colnames(penguin_wide_med)
+#need to check and change for column names from this document
+
+penguin_med = penguin_wide_med %>% 
+  dplyr::rename(hp = `SUM.of.penguin_hp`, dna = `SUM.of.penguin_dna_med`,
+                dna_or_hp = `SUM.of.penguin_med_dna_or_hp`, 
+                same_taxon = `SUM.of.penguin_med_both`) %>%
+  #Renamed columns
+  reshape2::melt(id.vars=c("sample_id", "location_id", "location", "time_id", "group_id"), variable.name = "metric", value.name = "detection") %>%
+  #Transform wide to long data, using melt(), and added arguments for renaming the output variable and value to "metric" and "detection"
+   mutate(method = if_else(metric == "hp", "hard part", "DNA standard QC"))
+
+#Looking good:
+str(penguin_med)
+
+```
+
+```{r Data 4: Penguin high stringency}
+
+## 2 Bird detections using high stringency DNA QC + hard-parts
+#Piping multiple steps
+
+#colnames(penguin_wide_high)
+#need to check and change for column names from this document
+
+penguin_high = penguin_wide_high %>% 
+  dplyr::rename(hp = `SUM.of.penguin_hp`, dna = `SUM.of.penguin_dna_high`,
+                dna_or_hp = `SUM.of.penguin_high_dna_or_hp`, 
+                same_taxon = `SUM.of.penguin_high_both`) %>%
+  #Renamed columns
+  reshape2::melt(id.vars=c("sample_id", "location_id", "location", "time_id", "group_id"), variable.name = "metric", value.name = "detection") %>%
+  #Transform wide to long data, using melt(), and added arguments for renaming the output variable and value to "metric" and "detection"
+  #mutate(dna_qc = "high") %>%
+  #Added the character vector/factor for merging with the high stringency data
+  filter(metric != "hp") %>% #here I'm removing the repeated subset of data on hard-part analysis for graphing
+  mutate(method = "DNA stringent QC")
+
+#Looking good:
+str(penguin_high)
+
+```
+
+```{r Bird master}
+
+#Need to join the birdD_med and birdD_high datasets for graphing
+
+bird_master <- rbind(birdD_med, birdD_high)
+
+```
+
+```{r Penguin master}
+
+#Need to join the penguin_med and penguin_high datasets for graphing
+
+penguin_master <- rbind(penguin_med, penguin_high)
+
+```
+
+
+```{r Data summaries by metric}
+
+#Overall bird detection by method: need sum of all samples containing bird by method of detection
+#Need to scale to 100%
+
+#1 Bird medium stringency
+bird_sum_med <- ddply(birdD_med, "metric", summarise,
+                  `Detected` = sum(detection, na.rm=TRUE)*100/99,
+                  `Not detected` = (99 - sum(detection, na.rm=TRUE)*100/99))
+str(bird_sum_med)
+
+bird_detect_med <- melt(bird_sum_med, id.vars="metric", variable.name = "detection", value.name = "percentage")
+str(bird_detect_med)
+
+#2 Bird high stringency
+bird_sum_high <- ddply(birdD_high, "metric", summarise,
+                  `Detected` = sum(detection, na.rm=TRUE)*100/99,
+                  `Not detected` = (99 - sum(detection, na.rm=TRUE)*100/99))
+str(bird_sum_high)
+
+bird_detect_high <- melt(bird_sum_high, id.vars="metric", variable.name = "detection", value.name = "percentage")
+str(bird_detect_high)
+
+# Bird master
+bird_sum_master <- ddply(bird_master, c("method", "metric"), summarise,
+                  `Detected` = sum(detection, na.rm=TRUE)*100/99,
+                  `Not detected` = (99 - sum(detection, na.rm=TRUE)*100/99))
+str(bird_sum_master)
+
+
+#3 Penguin medium stringency
+penguin_sum_med <- ddply(penguin_med, "metric", summarise,
+                  `Detected` = sum(detection, na.rm=TRUE)*100/99,
+                  `Not detected` = (99 - sum(detection, na.rm=TRUE)*100/99))
+str(penguin_sum_med)
+
+penguin_detect_med <- melt(penguin_sum_med, id.vars="metric", variable.name = "detection", value.name = "percentage")
+str(bird_detect_med)
+
+#4 Penguin high stringency
+penguin_sum_high <- ddply(penguin_high, "metric", summarise,
+                  `Detected` = sum(detection, na.rm=TRUE)*100/99,
+                  `Not detected` = (99 - sum(detection, na.rm=TRUE)*100/99))
+str(penguin_sum_high)
+
+penguin_detect_high <- melt(penguin_sum_high, id.vars="metric", variable.name = "detection", value.name = "percentage")
+str(bird_detect_high)
+
+# Penguin master
+penguin_sum_master <- ddply(penguin_master, c("method", "metric"), summarise,
+                  `Detected` = sum(detection, na.rm=TRUE)*100/99,
+                  `Not detected` = (99 - sum(detection, na.rm=TRUE)*100/99))
+str(penguin_sum_master)
+
+#Can double check this with table()
+#table(birdD_long$metric, birdD_long$value)
+
+##Note on renaming values in rows as groups of values:
+#d$Var2[d$Var1 == "C"] <- "Medium"
+
+```
+
+```{r Data summaries by location/time}
+
+#Overall bird detection by method: need sum of all samples containing bird by method of detection
+#Need to scale to 100%
+str(birdD_med)
+#1 Bird medium stringency
+bird_sumgroup_med <- ddply(birdD_med, c("location_id", "time_id", "metric"), summarise,
+                  `Detected` = sum(detection, na.rm=TRUE)*100/99)
+str(bird_sumgroup_med)
+
+#2 Bird high stringency
+bird_sum_high <- ddply(birdD_high, c("location_id", "time_id", "metric"), summarise,
+                  `Detected` = sum(detection, na.rm=TRUE)*100/99)
+str(bird_sum_high)
+
+#3 Penguin medium stringency
+penguin_sum_med <- ddply(penguin_med, "metric", summarise,
+                  `Detected` = sum(detection, na.rm=TRUE)*100/99)
+str(penguin_sum_med)
+
+#4 Penguin high stringency
+penguin_sum_high <- ddply(penguin_high, c("location_id", "time_id", "metric"), summarise,
+                  `Detected` = sum(detection, na.rm=TRUE)*100/99)
+str(penguin_sum_high)
+
+
+#Can double check this with table()
+#table(birdD_long$metric, birdD_long$value)
+
+##Note on renaming values in rows as groups of values:
+#d$Var2[d$Var1 == "C"] <- "Medium"
+
+```
+
+# Figures
+
+# Figure to do's:
+Take out the “Not Detected” panel as is redundant; merge data by DNA stringency and make two pairs of plots for birds vs. stringency and penguins vs. stringency.
+
+```{r Figure 2 standard DNA}
+#Bird detections medium stringency DNA QC
+
+#Colour palette
+fig2.pal <- pnw_palette(5, name = "Bay", type = "continuous")
+
+#Figure 2
+bird_fig2a <- ggplot(bird_detect_med, aes(x=metric, y=percentage, fill=metric)) +
+  geom_bar(stat="identity",position="dodge")+
+  #ggtitle("a) Standard DNA filtering")+
+  theme_bw() + theme(panel.grid.major = element_blank()) +
+  theme(plot.title=element_text(face="bold", size=18))+
+  theme(axis.title=element_text(size=18)) + theme(axis.text=element_text(size=18)) +
+  theme(axis.text.x=element_blank())+
+  theme(legend.text=element_text(size=18)) + #theme(legend.title=element_text(size=14)) +
+  theme(legend.position=c(0.2,0.75), legend.justification=c(0.4,0.5))+
+  scale_fill_manual(values=fig2.pal)+
+  guides(fill=guide_legend(title=NULL))+
+  labs(title ="a) Standard DNA filtering", x="Metric", y="Percentage of samples (%)") +
+  facet_grid(.~detection)+
+  theme(strip.text = element_text(size=rel(1.25)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+bird_fig2a
+
+ggsave('figure2a_birddetectmed.jpeg', plot = bird_fig2a, width = 7.5, height = 5, dpi = 300)
+
+```
+
+```{r Figure 2b}
+#Bird detections high stringency DNA QC
+
+#Colour palette
+fig2.pal <- pnw_palette(5, name = "Bay", type = "continuous")
+
+#Figure 2
+bird_fig2b <- ggplot(bird_detect_high, aes(x=metric, y=percentage, fill=metric)) +
+  geom_bar(stat="identity",position="dodge")+
+  theme_bw() + theme(panel.grid.major = element_blank()) +
+  theme(plot.title=element_text(face="bold", size=18))+
+  theme(axis.title=element_text(size=18)) + theme(axis.text=element_text(size=18)) +
+  theme(axis.text.x=element_blank())+
+  theme(legend.text=element_text(size=18)) + #theme(legend.title=element_text(size=14)) +
+  theme(legend.position=c(0.2,0.75), legend.justification=c(0.4,0.5))+
+  scale_fill_manual(values=fig2.pal)+
+  guides(fill=guide_legend(title=NULL))+
+  labs(title ="b) Stringent DNA filtering", x="Metric", y="Percentage of samples (%)") +
+  facet_grid(.~detection)+
+  theme(strip.text = element_text(size=rel(1.25)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+bird_fig2b
+
+ggsave('figure2b_birddetecthigh.jpeg', plot = bird_fig2b, width = 7.5, height = 5, dpi = 300)
+
+```
+
+```{r Figure 2 Bird master}
+
+unique(bird_sum_master$method)
+
+#Relevel the method so that hard-part method comes first in the graph
+levels(bird_sum_master$method)
+bird_sum_master$method <- factor(bird_sum_master$method, levels = c("hard part", "DNA standard QC", "DNA stringent QC"))
+
+#Figure 2
+bird_fig2 <- ggplot(bird_sum_master, aes(x=metric, y=Detected, fill=metric)) +
+  geom_bar(stat="identity", position="dodge", width=1)+
+  ggtitle("a) Bird detections by metric")+
+  theme_bw() + theme(panel.grid.major = element_blank()) +
+  theme(plot.title=element_text(face="bold", size=18))+
+  theme(axis.title=element_text(size=18)) + theme(axis.text=element_text(size=18)) +
+  theme(axis.text.x=element_blank())+
+  theme(legend.text=element_text(size=14)) + 
+  theme(legend.title=element_text(size=14)) +
+  ylim(0,50)+
+  #theme(legend.position=c(0.60,0.80), legend.justification=c(0.4,0.5))+
+  theme(legend.position="top")+
+  scale_fill_manual(values=fig2.pal)+
+  guides(fill=guide_legend(title="Metric:"))+
+  labs(x=NULL, y="Percentage of samples (%)") + #x="Metric", 
+  facet_grid(.~method, scales="free") +
+  theme(strip.text = element_text(size=rel(1.25)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+bird_fig2
+
+ggsave('figure2_bird.jpeg', plot = bird_fig2, width = 7.5, height = 5, dpi = 300)
+
+
+```
+
+
+```{r Figure 3a}
+#Penguin detections medium stringency DNA QC
+
+#Colour palette #select the first four colours in fig2.pal to match the colours in previous graphs for "hp", "dna", "dna_or_hp" and "same_taxon"
+#check palette using
+#str(fig2.pal)
+fig3.pal <- c("#00496F", "#0F85A0", "#EDD746", "#DD4124")
+
+#Figure 3a
+pingu_fig3a <- ggplot(penguin_detect_med, aes(x=metric, y=percentage, fill=metric)) +
+  geom_bar(stat="identity",position="dodge")+
+  theme_bw() + theme(panel.grid.major = element_blank()) +
+  theme(plot.title=element_text(face="bold", size=18))+
+  theme(axis.title=element_text(size=18)) + theme(axis.text=element_text(size=18)) +
+  theme(axis.text.x=element_blank())+
+  theme(legend.text=element_text(size=18)) + #theme(legend.title=element_text(size=14)) +
+  theme(legend.position=c(0.2,0.75), legend.justification=c(0.4,0.5))+
+  scale_fill_manual(values=fig3.pal)+
+  guides(fill=guide_legend(title=NULL))+
+  labs(title ="c) Standard DNA filtering", x="Metric", y="Percentage of samples (%)") +
+  facet_grid(.~detection)+
+  theme(strip.text = element_text(size=rel(1.25)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+pingu_fig3a
+
+ggsave('figure3a_penguindetectmed.jpeg', plot = pingu_fig3a, width = 7.5, height = 5, dpi = 300)
+
+```
+
+```{r Figure 3b}
+#Penguin detections medium stringency DNA QC
+
+#Figure 3b
+pingu_fig3b <- ggplot(penguin_detect_high, aes(x=metric, y=percentage, fill=metric)) +
+  geom_bar(stat="identity",position="dodge")+
+  #ggtitle("a) Standard DNA filtering")+
+  theme_bw() + theme(panel.grid.major = element_blank()) +
+  theme(plot.title=element_text(face="bold", size=18))+
+  theme(axis.title=element_text(size=18)) + theme(axis.text=element_text(size=18)) +
+  theme(axis.text.x=element_blank())+
+  theme(legend.text=element_text(size=18)) + #theme(legend.title=element_text(size=14)) +
+  theme(legend.position=c(0.2,0.75), legend.justification=c(0.4,0.5))+
+  scale_fill_manual(values=fig3.pal)+
+  guides(fill=guide_legend(title=NULL))+
+  labs(title ="d) Stringent DNA filtering", x="Metric", y="Percentage of samples (%)") +
+  facet_grid(.~detection)+
+  theme(strip.text = element_text(size=rel(1.25)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+pingu_fig3b
+
+ggsave('figure3b_penguindetecthigh.jpeg', plot = pingu_fig3b, width = 7.5, height = 5, dpi = 300)
+```
+
+```{r Figure 3 Penguin master}
+
+unique(penguin_sum_master$method)
+
+#Relevel the method so that hard-part method comes first in the graph
+levels(penguin_sum_master$method)
+penguin_sum_master$method <- factor(penguin_sum_master$method, levels = c("hard part", "DNA standard QC", "DNA stringent QC"))
+
+#Figure 2
+penguin_fig3 <- ggplot(penguin_sum_master, aes(x=metric, y=Detected, fill=metric)) +
+  geom_bar(stat="identity", position="dodge", width=1)+
+  ggtitle("b) Penguin detections by metric")+
+  theme_bw() + theme(panel.grid.major = element_blank()) +
+  theme(plot.title=element_text(face="bold", size=18))+
+  theme(axis.title=element_text(size=18)) + theme(axis.text=element_text(size=18)) +
+  theme(axis.text.x=element_blank())+
+  theme(legend.text=element_text(size=14)) + 
+  theme(legend.title=element_text(size=14)) +
+  #theme(legend.position=c(0.60,0.80), legend.justification=c(0.4,0.5))+
+  theme(legend.position="top")+
+  ylim(0,50)+
+  scale_fill_manual(values=fig2.pal)+
+  guides(fill=guide_legend(title="Metric:"))+
+  labs(x=NULL, y="Percentage of samples (%)") + #x="Metric", 
+  facet_grid(.~method, scales="free") +
+  theme(strip.text = element_text(size=rel(1.25)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+penguin_fig3
+
+ggsave('figure3_penguin.jpeg', plot = penguin_fig3, width = 7.5, height = 5, dpi = 300)
+
+
+```
+
+```{r Figure 4a}
+#Bird detections by location & time (medium stringency DNA QC)
+
+#REWRITE THIS FOR FIG 4.
+
+#Colour palette
+#fig2.pal <- pnw_palette(5, name = "Bay", type = "continuous")
+
+#Figure 2
+bird_fig2a <- ggplot(bird_group_med, aes(x=c(location_id, time_id), y=percentage, fill=metric)) +
+  geom_bar(stat="identity",position="dodge")+
+  #ggtitle("a) Standard DNA filtering")+
+  theme_bw() + theme(panel.grid.major = element_blank()) +
+  theme(plot.title=element_text(face="bold", size=18))+
+  theme(axis.title=element_text(size=18)) + theme(axis.text=element_text(size=18)) +
+  theme(axis.text.x=element_blank())+
+  theme(legend.text=element_text(size=18)) + #theme(legend.title=element_text(size=14)) +
+  theme(legend.position=c(0.2,0.75), legend.justification=c(0.4,0.5))+
+  scale_fill_manual(values=fig2.pal)+
+  guides(fill=guide_legend(title=NULL))+
+  labs(title ="a) Standard DNA filtering", x="Metric", y="Percentage of samples (%)") +
+  facet_grid(.~detection)+
+  theme(strip.text = element_text(size=rel(1.25)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+bird_fig2a
+
+ggsave('figure2a_birddetectmed.jpeg', plot = bird_fig2a, width = 7.5, height = 5, dpi = 300)
+
+```
+
+# Statistical Analyses
+
+We aim to test the hypothesis that bird or penguin detections will vary using different methods and combinations of these methods (here referred to as "metric").
+Experimental design/formula: detection ~ metric
+These data are binomial and seem to have violated assumptions for simpler tests + ANOVA. So we are running a binomial regression (glm with family=binomial)
+
+```{r Checking Data}
+
+#Data distributions
+dotchart(birdD_med$detection)
+#Histogram
+hist(birdD_med$detection)
+
+```
+
+
+```{r Analyses}
+
+#Binomial GLMs
+str(birdD_med)
+bird_model_med <- glm(detection ~ metric, family = binomial, data = birdD_med)
+anova(bird_model_med, test = "Chisq")
+summary(bird_model_med)
+
+#Problem might need negative binomial
+
+#Plot residuals
+plot(bird_model_med)
+
+#Overdispersion? Seems fine
+E1 <- resid(bird_model_med, type = "pearson")
+Overdispersion <- sum(E1^2) / bird_model_med$df.res #df.res = N-p
+Overdispersion
+
+par(mfrow = c(2, 2))
+plot(M3)
+
+#Plot Residuals vs. Fitted values
+#E1
+F1 <- fitted(bird_model_med)
+plot(x = F1, 
+     y = E1,
+     xlab = "Fitted values",
+     ylab = "Residuals")
+#abline(h = 0, v = 0, lty = 2)
+
+
+#Normality
+hist(E1) #, breaks = 15
+#non-normal data, hence the binomial regression
+
+#Influential observations
+plot(bird_model_med, which = c(4))
+
+plot(cooks.distance(bird_model_med),
+     type = "h",
+     ylim = c(0,1))
+abline(h=1)
+
+
+#Plot relationship
+plot(x = birdD_med$metric, 
+     y = E1,
+     xlab = "Metric",
+     ylab = "Residuals")
+abline(h = 0, v = 0, lty=2)
+#Same as:
+boxplot(E1 ~ metric, data = birdD_med)
+
+
+#Per period:
+xyplot(E1 ~ metric, 
+       data = birdD_med,
+       panel = function(x,y){
+         panel.points(x,y, col = 1, pch = 16, cex = 0.7)
+         panel.loess(x,y, col = 1, lwd = 2)
+         panel.abline(h=0)
+       })
+
+
+#Anova 
+#Highly significant, not sure if working for our data
+bird_detect_anova <- aov(detection ~ metric, data = birdD_med)
+anova(bird_detect_anova, test = "Chisq")
+
+```
