@@ -99,6 +99,22 @@ data_wide
 
 ```
 
+```{r Panel plot - combining axes}
+#OR
+#This example using ggarrange and common.legend =TRUE
+#https://stackoverflow.com/questions/13649473/add-a-common-legend-for-combined-ggplots
+
+#combine using cowplot
+#fig4_panel = plot_grid(fig4a_hptaxa , fig4b_dna_detect, fig4c_otu_abun, ncol = 3)
+#fig4_panel
+#create common axis titles
+#y4.grob <- textGrob("Individual sample & Sampling time", gp=gpar(fontsize=18), rot=90) #fontface="bold", col="blue", 
+#x5.grob <- textGrob("Detection of seabirds in samples (n)", gp=gpar(fontsize=18)) #fontface="bold", col="blue", 
+#add to plot
+#fig4_panel = grid.arrange(arrangeGrob(fig5_panel, left = y4.grob, padding = unit(1, "line"))) #bottom = x5.grob, 
+
+```
+
 
 ```{r Useful functions}
 
