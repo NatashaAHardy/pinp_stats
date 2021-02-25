@@ -35,7 +35,10 @@ Project objective: to compare the detection rates of birds in long-nose fur seal
 
 ```{r Workspace}
 
-getwd()
+#Check working directory - the same as the doc directory.
+
+#getwd()
+
 #Install Packages as needed
 #install.packages("rcompanion")
 
@@ -510,7 +513,7 @@ fig3a_bird <- ggplot(bird_sum_master, aes(x=metric, y=Detected, fill=metric)) +
                                         size=1))
 fig3a_bird
 
-ggsave(here('figures/Final versions/fig3a_bird.jpeg'), plot = fig3a_bird, width = 9, height = 5, dpi = 300)
+#ggsave(here('figures/Final versions/fig3a_bird.jpeg'), plot = fig3a_bird, width = 9, height = 5, dpi = 300)
 
 ```
 
@@ -553,7 +556,7 @@ fig3b_penguin <- ggplot(penguin_sum_master, aes(x=metric, y=Detected, fill=metri
                                         size=1))
 fig3b_penguin
 
-ggsave(here('figures/Final versions/fig3b_penguin.jpeg'), plot = fig3b_penguin, width = 9, height = 5, dpi = 300)
+#ggsave(here('figures/Final versions/fig3b_penguin.jpeg'), plot = fig3b_penguin, width = 9, height = 5, dpi = 300)
 
 
 ```
@@ -585,9 +588,9 @@ fig3_panel
 fig3_panel_ms = grid.arrange(arrangeGrob(fig3_panel, left = y.grob, padding = unit(1, "line")))
 fig3_panel_ms
 
-ggsave(here("figures/Final versions/fig3_panel_ms.jpeg"), plot = fig3_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
+#ggsave(here("figures/Final versions/fig3_panel_ms.jpeg"), plot = fig3_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
 
-ggsave(here("figures/Final versions/fig3_panel_ms.pdf"), plot = fig3_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
+#ggsave(here("figures/Final versions/fig3_panel_ms.pdf"), plot = fig3_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
 
 ```
 
@@ -632,7 +635,7 @@ fig5a_bird <- ggplot(bird_master_group2, aes(x=time_id, y=percentage_detected, f
                                         size=1))
 fig5a_bird
 
-ggsave(here('figures/Final versions/fig5a_bird_pdetect_location.jpeg'), plot = fig5a_bird, width = 8, height = 9, dpi = 300)
+#ggsave(here('figures/Final versions/fig5a_bird_pdetect_location.jpeg'), plot = fig5a_bird, width = 8, height = 9, dpi = 300)
 
 ```
 
@@ -674,7 +677,7 @@ fig5b_penguin <- ggplot(penguin_master_group2, aes(x=time_id, y=percentage_detec
 
 fig5b_penguin
 
-ggsave('figures/Final versions/fig5b_penguin_pdetect_location.jpeg', plot = fig5b_penguin, width = 8, height = 9, dpi = 300)
+#ggsave('figures/Final versions/fig5b_penguin_pdetect_location.jpeg', plot = fig5b_penguin, width = 8, height = 9, dpi = 300)
 
 
 ```
@@ -702,9 +705,9 @@ bird_panel_ms = plot_grid(fig5a_bird, fig5b_penguin,
 #add to plot
 bird_panel_ms = grid.arrange(arrangeGrob(bird_panel_ms, left = y.grob, bottom = x.grob, padding = unit(1, "line")))
 
-ggsave(here("figures/Final versions/fig5_panel_ms.pdf"), plot = bird_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
+#ggsave(here("figures/Final versions/fig5_panel_ms.pdf"), plot = bird_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
 
-ggsave(here("figures/Final versions/fig5_panel_ms.jpeg"), plot = bird_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
+#ggsave(here("figures/Final versions/fig5_panel_ms.jpeg"), plot = bird_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
 
 ```
 
@@ -735,7 +738,7 @@ figS3a_bird <- ggplot(bird_master_group2, aes(x=time_id, y=detected, fill=metric
                                         size=1))
 figS3a_bird
 
-ggsave('figures/ESM/figS3a_birddetect_location.jpeg', plot = figS3a_bird, width = 8, height = 10, dpi = 300)
+#ggsave('figures/ESM/figS3a_birddetect_location.jpeg', plot = figS3a_bird, width = 8, height = 10, dpi = 300)
 
 
 ```
@@ -771,7 +774,7 @@ figS3b_penguin <- ggplot(penguin_master_group2, aes(x=time_id, y=detected, fill=
   
 figS3b_penguin
 
-ggsave('figures/ESM/figS3b_penguin_detect_location.jpeg', plot = figS3b_penguin, width = 8, height = 10, dpi = 300)
+#ggsave('figures/ESM/figS3b_penguin_detect_location.jpeg', plot = figS3b_penguin, width = 8, height = 10, dpi = 300)
 
 
 ```
@@ -792,9 +795,9 @@ figS3_panel_esm = plot_grid(figS3a_bird, figS3b_penguin,
 #add to plot
 bird_panel_esm = grid.arrange(arrangeGrob(figS3_panel_esm, left = yS1.grob, bottom = xS1.grob, padding = unit(1, "line")))
 
-ggsave("figures/ESM/figS3_bird_panel_esm.pdf", plot = bird_panel_esm, width = 14, height = 12, scale = 0.95, dpi = 300)
+#ggsave("figures/ESM/figS3_bird_panel_esm.pdf", plot = bird_panel_esm, width = 14, height = 12, scale = 0.95, dpi = 300)
 
-ggsave("figures/ESM/figS3_bird_panel_esm.jpeg", plot = bird_panel_esm, width = 14, height = 12, scale = 0.95, dpi = 300)
+#ggsave("figures/ESM/figS3_bird_panel_esm.jpeg", plot = bird_panel_esm, width = 14, height = 12, scale = 0.95, dpi = 300)
 
 ```
 
@@ -864,7 +867,7 @@ fig4a_hptaxa = otu_hp_master %>%
 
 fig4a_hptaxa
 
-ggsave('figures/Final versions/fig4a_hptaxa_RRA_label.pdf', plot = fig4a_hptaxa, width = 12, height = 12, dpi = 300)
+#ggsave('figures/Final versions/fig4a_hptaxa_RRA_label.pdf', plot = fig4a_hptaxa, width = 12, height = 12, dpi = 300)
 
 
 ```
@@ -902,7 +905,7 @@ fig4b_dna_detect = otu_hp_master %>%
                                         size=1))
 fig4b_dna_detect
 
-ggsave('figures/Final versions/fig4b_dna_detect.pdf', plot = fig4b_dna_detect, width = 12, height = 12, dpi = 300)
+#ggsave('figures/Final versions/fig4b_dna_detect.pdf', plot = fig4b_dna_detect, width = 12, height = 12, dpi = 300)
 
 ```
 
@@ -923,9 +926,9 @@ fig4_panel_test=grid.arrange(fig4a_hptaxa, #+  theme(legend.position=c(0.5, 0.90
 
 fig4_panel_ms = grid.arrange(arrangeGrob(fig4_panel_test, left = y4.grob, bottom = x4.grob, padding = unit(1, "line")))
 
-ggsave("figures/Final versions/fig4_panel.pdf", plot = fig4_panel_ms, width = 20, height = 14, scale = 0.95, dpi = 300)
+#ggsave("figures/Final versions/fig4_panel.pdf", plot = fig4_panel_ms, width = 20, height = 14, scale = 0.95, dpi = 300)
 
-ggsave("figures/Final versions/fig4_panel.jpeg", plot = fig4_panel_ms, width = 20, height = 14, scale = 0.95, dpi = 300)
+#ggsave("figures/Final versions/fig4_panel.jpeg", plot = fig4_panel_ms, width = 20, height = 14, scale = 0.95, dpi = 300)
 
 ```
 
@@ -965,7 +968,7 @@ figS1_otu_abun = otu_hp_master %>%
 figS1_otu_abun
 
 #Save as jpeg
-ggsave('figures/ESM/figS1_otu_abun.pdf', plot = figS1_otu_abun, width = 12, height = 12, dpi = 300)
+#ggsave('figures/ESM/figS1_otu_abun.pdf', plot = figS1_otu_abun, width = 12, height = 12, dpi = 300)
 #In pdf:
 #Need to italicise a portion of species names
 ```
@@ -1005,7 +1008,7 @@ figSX_otu_RRA <- otu_hp_master %>%
                                         size=1))
 figSX_otu_RRA
 
-ggsave('figures/ESM/figSX_otu_totalRA.pdf', plot = figSX_otu_RRA, width = 8, height = 12, dpi = 300)
+#ggsave('figures/ESM/figSX_otu_totalRA.pdf', plot = figSX_otu_RRA, width = 8, height = 12, dpi = 300)
 
 ```
 
@@ -1053,7 +1056,7 @@ figS2_otu_RRA = otu_rra %>%
                                         size=1))
 figS2_otu_RRA
 
-ggsave('figures/ESM/figS2_otu_RRA.pdf', plot = figS2_otu_RRA, width = 12, height = 12, dpi = 300)
+#ggsave('figures/ESM/figS2_otu_RRA.pdf', plot = figS2_otu_RRA, width = 12, height = 12, dpi = 300)
 
 ```
 
@@ -1099,8 +1102,9 @@ fig7_haplo_presence = penguin_haplos_sample %>%
                                         size=1))
 fig7_haplo_presence
 
-ggsave(here('figures/Final versions/fig7_haplo_presence.pdf'), plot = fig7_haplo_presence, width = 10, height = 10, dpi = 300)
-ggsave(here('figures/Final versions/fig7_haplo_presence.jpg'), plot = fig7_haplo_presence, width = 10, height = 10, dpi = 300)
+#ggsave(here('figures/Final versions/fig7_haplo_presence.pdf'), plot = fig7_haplo_presence, width = 10, height = 10, dpi = 300)
+
+#ggsave(here('figures/Final versions/fig7_haplo_presence.jpg'), plot = fig7_haplo_presence, width = 10, height = 10, dpi = 300)
 
 ```
 
@@ -1143,7 +1147,7 @@ figS4_haplo_bubble = penguin_haplos %>%
                                         size=1))
 figS4_haplo_bubble
 
-ggsave(here('figures/ESM/figS4_haplo_bubble.pdf'), plot = figS4_haplo_bubble, width = 10, height = 10, dpi = 300)
+#ggsave(here('figures/ESM/figS4_haplo_bubble.pdf'), plot = figS4_haplo_bubble, width = 10, height = 10, dpi = 300)
 
 ```
 

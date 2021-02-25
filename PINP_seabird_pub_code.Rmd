@@ -1,0 +1,459 @@
+---
+title: "PINP Code for seabird detection in fur seal diets"
+author: "Natasha Hardy"
+date: "25/02/2021"
+output: html_document
+---
+
+## About
+
+**Citation:** MS in prep. Add citation after submission.
+
+This document contains all code pertinent to figures and analyses presented in this publication:
+(i) data manipulation, 
+(ii) data analyses and 
+(iii) visualisations for the seabird detection in long-nosed fur seal diet project.
+
+Predator species: long-nosed fur seals.
+Prey target taxa: seabirds.
+Total samples: 99 scats from long-nosed fur seals.
+Locations: Cape Bridgewater, Barunguba (Montague Island), Gabo Island and Deen Maar (Lady Julia Percy).
+Sample collection dates: Jan 2015 - Jan 2017.
+Project objective: to compare the detection rates of birds in long-nose fur seal scats across the range of this predator in SE Australia from Bass Strait to southern NSW, and over multiple seasons.
+
+## Workspace
+
+```{r Workspace, echo=TRUE, message=FALSE,results='hide'}
+
+#Check working directory - the same as the doc directory.
+
+#getwd()
+
+#Install Packages as needed
+#install.packages("rcompanion")
+
+#Load
+library(tidyverse)
+library(tidyr)
+library(tidytext)
+#library(reshape)
+library(plyr)
+library(dplyr)
+library(PNWColors)
+library(lattice)
+library(reshape2)
+library(lme4)
+library(ggplot2)
+library(rcompanion)
+library(gg.gap)
+library(forcats)
+library(devtools)
+library(cowplot)
+library(grid)
+library(gridExtra)
+library(scales)
+library(ggpubr)
+library(here)
+"%notin%" = Negate('%in%')
+here::here()
+
+#Note that loading all these packages is hell because of overlap in functions, some packages being superceded but still requiring each other or requiring functions from one package to another. You'll notice I had to force a lot of functions by calling the package as follows 
+#data %>% package::function(etc). I'm sure there are more talented and savvy coders than me who can figure this out more elegantly.
+
+```
+
+## Load data
+
+These dataframes are currently downloaded as .csv spreadsheets from the diet analysis master document found here: 
+[PINP Bird Data](https://docs.google.com/spreadsheets/d/1phfyo3kUyWZfwKF0IAHXgkxy23dbYs_tKkCfEIWeY8g/edit#gid=2115650924)
+
+**NOTE:** we want to clean this up and include the whole spreadsheet and read these in as tabs.
+
+```{r Load data}
+
+#0 = "hp_taxa" tab
+hp_taxa_export <- read.csv(here("data/input_data/hp_taxa.csv"), header=TRUE)
+
+#1 = "bird_detect_med" tab
+bird_wide_med <- read.csv(here("data/input_data/bird_detect_med.csv"), header=TRUE)
+
+#2 = "bird_detect_high" tab
+bird_wide_high <- read.csv(here("data/input_data/bird_detect_high.csv"), header=TRUE)
+
+#3 = "penguin_detect_med" tab
+penguin_wide_med <- read.csv(here("data/input_data/penguin_detect_med.csv"), header=TRUE)
+
+#4 = "penguin_detect_high" tab
+penguin_wide_high <- read.csv(here("data/input_data/penguin_detect_high.csv"), header=TRUE)
+
+#5 = "otu_med" tab
+otu_med_export <- read.csv(here("data/input_data/otu_med.csv"), header=TRUE)
+
+#6 = "otu_high" tab
+otu_high_export <- read.csv(here("data/input_data/otu_high.csv"), header=TRUE)
+
+#7 penguin haplotypes
+penguin_haplos_export <- read.csv(here("data/input_data/penguin_haplos.csv"), header=TRUE)
+
+```
+
+
+## Data manipulations
+
+Here we mainly clean column or variable names, gather wide data and change to longform.
+I originally chose to input data as columns in the master document tab "BIRD_DATA" in PINP_BIRD_DATA.xlsx on GoogleDrive. This is because many columns were calculated based off other columns (such as medium stringency DNA OTU total abundance used to calculate a 1% cut-off for high stringency DNA OTU columns). This means a little data wrangling on this end to merge these data into long-form for analyses and graphing.
+
+For the following manipulations, I'm going to:
+(i) Rename colnames for each of the four datasets exported, 
+(ii) Transform from wide to long data, using melt(), and include arguments for renaming the output variable and value to "metric" and "detection", and
+(iii) Add a categorical descriptor for each method, to later merge datasets 1+2 (bird detections) and 3+4 (penguin detections)
+
+Columns are renamed as follows:
+hp = hard-part analysis to ID prey
+dna = DNA metabarcoding to ID prey
+dna_or_hp = detections using either method
+same_taxon = both detected the same bird taxon (for bird only, as "both" and "same" are equal for looking at one taxon such as penguins)
+Note, I have removed "both_methods = both detected birds/penguins". This column was confusing and did not add information, it was originally to report the number of samples that contained different taxa identified from the same taxa using both methods.
+
+Then add descriptor:
+medium = standard QC for DNA based analysis
+high = additional exclusion of trace amounts of DNA that passed QC
+
+Note on 22nd March 2020, I corrected a mistake in an excel function for the penguin datasets, that had effectively inputted some wrong numbers in the penguin detection columns. I have rerun analyses and updated stats, and figures.
+
+```{r Data 0: Hard part data}
+
+hp_taxa = hp_taxa_export %>%
+  dplyr::rename(`E. minor` = `SUM.of.penguin_hp`, 
+                Procellarid = `SUM.of.procellarid_hp`,
+                `M. serrator` = `SUM.of.gannet_hp`, 
+                `Seabird unknown` = `SUM.of.unknown_hp`) %>%
+  #Renamed columns
+  reshape2::melt(id.vars=c("sample_id", "location_id", "location", "time_id", "group_id"), variable.name = "Taxa", value.name = "detect") %>%
+  #Transform wide to long data, using melt(), and added arguments for renaming the output variable and value to "metric" and "detection"
+  #Added the character vector/factor for merging with the high stringency data
+  mutate(method = "hard-parts")
+
+#Rename factor levels
+hp_taxa$location <- factor(hp_taxa$location, 
+                           levels = c("Cape Bridgewater", "Gabo Island", "Lady Julia Percy", "Montague Island"), 
+                           labels = c("Cape Bridgewater", "Gabo Island", "Deen Maar", "Barunguba"))
+
+hp_taxa$time_id <- factor(hp_taxa$time_id, 
+                          levels = c("Sep_15", "Jan_16", "Sep_16", "Jan_17", "Mar_17"), 
+                          labels = c("Sep'15", "Jan'16", "Sep'16", "Jan'17", "Mar'17"))
+
+```
+
+```{r Data 1: Bird standard QC}
+
+bird_med = bird_wide_med %>% 
+  dplyr::rename(hp = `SUM.of.allbirds_hp`, dna = `SUM.of.allbirds_dna_cons`,
+                dna_or_hp = `SUM.of.allbirds_cons_dna_or_hp`, 
+                both_methods = `SUM.of.allbirds_cons_both`, 
+                same_taxon = `SUM.of.allbirds_cons_sametaxa`) %>%
+  #Renamed columns
+  dplyr::select(., -both_methods) %>%
+  reshape2::melt(id.vars=c("sample_id", "location_id", "location", "time_id", "group_id"), variable.name = "metric", value.name = "detection") %>%
+  #Transform wide to long data, using melt(), and added arguments for renaming the output variable and value to "metric" and "detection"
+  #Added the character vector/factor for merging with the high stringency data
+ mutate(method = if_else(metric == "hp", "hard part", "DNA standard QC"))
+
+#Rename factor levels
+bird_med$location <- factor(bird_med$location, 
+                            levels = c("Cape Bridgewater", "Gabo Island", "Lady Julia Percy", "Montague Island"), 
+                            labels = c("Cape Bridgewater", "Gabo Island", "Deen Maar", "Barunguba"))
+
+bird_med$time_id <- factor(bird_med$time_id, 
+                           levels = c("Sep_15", "Jan_16", "Sep_16", "Jan_17", "Mar_17"), 
+                           labels = c("Sep'15", "Jan'16", "Sep'16", "Jan'17", "Mar'17"))
+
+```
+
+```{r Data 2: Bird high QC}
+
+bird_high = bird_wide_high %>% 
+  dplyr::rename(hp = `SUM.of.allbirds_hp`, dna = `SUM.of.allbirds_dna_high`, 
+                dna_or_hp = `SUM.of.allbirds_high_dna_or_hp`, 
+                both_methods = `SUM.of.allbirds_high_both`, 
+                same_taxon = `SUM.of.allbirds_high_same`) %>%
+  #Renamed columns
+  dplyr::select(., -both_methods) %>%
+  reshape2::melt(id.vars=c("sample_id", "location_id", "location", "time_id", "group_id"), variable.name = "metric", value.name = "detection") %>%
+  #Transform wide to long data, using melt(), and added arguments for renaming the output variable and value to "metric" and "detection"
+  filter(metric != "hp") %>% #here I'm removing the repeated subset of data on hard-part analysis for graphing
+  mutate(method = "DNA stringent QC")
+
+#Rename factor levels
+bird_high$location <- factor(bird_high$location, 
+                             levels = c("Cape Bridgewater", "Gabo Island", "Lady Julia Percy", "Montague Island"), 
+                             labels = c("Cape Bridgewater", "Gabo Island", "Deen Maar", "Barunguba"))
+
+bird_high$time_id <- factor(bird_high$time_id, 
+                            levels = c("Sep_15", "Jan_16", "Sep_16", "Jan_17", "Mar_17"),
+                            labels = c("Sep'15", "Jan'16", "Sep'16", "Jan'17", "Mar'17"))
+
+```
+
+```{r Data 3: Penguin standard QC}
+
+penguin_med = penguin_wide_med %>% 
+  dplyr::rename(hp = `SUM.of.penguin_hp`, dna = `SUM.of.penguin_dna_cons`,
+                dna_or_hp = `SUM.of.penguin_cons_dna_or_hp`, 
+                same_taxon = `SUM.of.penguin_cons_both`) %>%
+  #Renamed columns
+  reshape2::melt(id.vars=c("sample_id", "location_id", "location", "time_id", "group_id"), variable.name = "metric", value.name = "detection") %>%
+  #Transform wide to long data, using melt(), and added arguments for renaming the output variable and value to "metric" and "detection"
+   mutate(method = if_else(metric == "hp", "hard part", "DNA standard QC"))
+
+#Rename factor levels
+penguin_med$location <- factor(penguin_med$location, 
+                               levels = c("Cape Bridgewater", "Gabo Island", "Lady Julia Percy", "Montague Island"), 
+                               labels = c("Cape Bridgewater", "Gabo Island", "Deen Maar", "Barunguba"))
+
+penguin_med$time_id <- factor(penguin_med$time_id, 
+                              levels = c("Sep_15", "Jan_16", "Sep_16", "Jan_17", "Mar_17"), 
+                              labels = c("Sep'15", "Jan'16", "Sep'16", "Jan'17", "Mar'17"))
+
+```
+
+```{r Data 4: Penguin high QC}
+
+penguin_high = penguin_wide_high %>% 
+  dplyr::rename(hp = `SUM.of.penguin_hp`, dna = `SUM.of.penguin_dna_high`,
+                dna_or_hp = `SUM.of.penguin_high_dna_or_hp`, 
+                same_taxon = `SUM.of.penguin_high_both`) %>%
+  #Renamed columns
+  reshape2::melt(id.vars=c("sample_id", "location_id", "location", "time_id", "group_id"), variable.name = "metric", value.name = "detection") %>%
+  #Transform wide to long data, using melt(), and added arguments for renaming the output variable and value to "metric" and "detection"
+  #Added the character vector/factor for merging with the high stringency data
+  filter(metric != "hp") %>% #here I'm removing the repeated subset of data on hard-part analysis for graphing
+  mutate(method = "DNA stringent QC")
+
+#Rename factor levels
+penguin_high$location <- factor(penguin_high$location, 
+                                levels = c("Cape Bridgewater", "Gabo Island", "Lady Julia Percy", "Montague Island"), 
+                                labels = c("Cape Bridgewater", "Gabo Island", "Deen Maar", "Barunguba"))
+
+penguin_high$time_id <- factor(penguin_high$time_id, 
+                               levels = c("Sep_15", "Jan_16", "Sep_16", "Jan_17", "Mar_17"), 
+                               labels = c("Sep'15", "Jan'16", "Sep'16", "Jan'17", "Mar'17"))
+
+```
+
+```{r Data 5: OTU standard QC}
+
+#OTU_med cleaning
+
+otu_med = otu_med_export %>% 
+  dplyr::rename(OTU1_E_minor = `SUM.of.cons_OTU_1..Eudyptula.minor.`, 
+                OTU2_Procellarid1 = `SUM.of.cons_OTU_2..Procellariidae.sp.1.`, 
+                OTU3_Procellarid2 = `SUM.of.cons_OTU_3..Procellariidae.sp.2.`, 
+                OTU4_T_melanophris = `SUM.of.cons_OTU_4..Thalassarche.melanophris.`,
+                OTU5_S_bergii = `SUM.of.cons_OTU_5..Sterna.bergii.`) %>%
+  #Renamed columns
+  reshape2::melt(id.vars=c("sample_id", "location_id", "location", "time_id", "group_id"), variable.name = "OTU", value.name = "seq_abun") %>%
+  #Transform wide to long data, using melt(), and added arguments for renaming the output variable and value to "metric" and "detection"
+  #Added the character vector/factor for merging with the high stringency data
+  mutate(method = "DNA standard QC")
+
+#Relative read abundances by taxon / OTU
+#Truncating datasets to calculate additional sequence metrics.
+mdata1 = otu_med %>% 
+  filter(OTU == "OTU1_E_minor") %>% 
+  mutate(seq_prop = seq_abun/sum(seq_abun)*100)
+mdata2 = otu_med %>% 
+  filter(OTU == "OTU2_Procellarid1") %>% 
+  mutate(seq_prop = seq_abun/sum(seq_abun)*100)
+mdata3 = otu_med %>% 
+  filter(OTU == "OTU3_Procellarid2") %>% 
+  mutate(seq_prop = seq_abun/sum(seq_abun)*100)
+mdata4 = otu_med %>% 
+  filter(OTU == "OTU4_T_melanophris") %>% 
+  mutate(seq_prop = seq_abun/sum(seq_abun)*100)
+mdata5 = otu_med %>% 
+  filter(OTU == "OTU5_S_bergii") %>% 
+  mutate(seq_prop = seq_abun/sum(seq_abun)*100)
+
+#Join these subsetted and manipulated datasets
+otu_med_data = rbind(mdata1, mdata2, mdata3, mdata4, mdata5) 
+
+#These two are split due to problems knitting the doc
+otu_med_data = otu_med_data %>%
+  mutate(trace_high = if_else(otu_med_data$seq_abun >= 10, "high", "trace"),
+         total_prop = seq_abun/sum(seq_abun)*100) #Add trace vs. high DNA abundance, and proportion of total seq abundance variable #Relative read abundance / total DNA abundance
+
+#Change labels for location
+otu_med_data$location <- factor(otu_med_data$location, levels = c("Cape Bridgewater", "Gabo Island", "Lady Julia Percy", "Montague Island"), labels = c("Cape Bridgewater", "GI", "DM", "Barunguba"))
+#Change labels for time
+otu_med_data$time_id <- factor(otu_med_data$time_id, levels = c("Sep_15", "Jan_16", "Sep_16", "Jan_17", "Mar_17"), labels = c("Sep'15", "Jan'16", "Sep'16", "Jan'17", "Mar'17"))
+#Change labels for OTUs
+#levels(otu_med_abundant$OTU)
+otu_med_data$OTU <- factor(otu_med_data$OTU, levels = c("OTU1_E_minor", "OTU2_Procellarid1", "OTU3_Procellarid2", "OTU4_T_melanophris", "OTU5_S_bergii"), labels = c("E. minor", "Procellarid sp1", "Procellarid sp2", "T. melanophris", "S. bergii"))
+
+otu_med_data$trace_high <- as.factor(otu_med_data$trace_high)
+
+#output = otu_med_data
+
+```
+
+```{r Data 6: OTU RRA + Total Abun}
+
+# Created a separate summary df
+otu_med_sum <- ddply(otu_med_data, c("location", "time_id", "group_id", "sample_id"), summarise,
+                  sample_abun = sum(seq_abun))
+# Joined back by sample_id (shared variable)
+otu_sampleabun <- merge(x = otu_med_data, y = otu_med_sum, by = c("location", "time_id", "group_id", "sample_id"))
+
+otu_metrics = otu_sampleabun %>%
+  select(location:OTU, method, trace_high, seq_abun, sample_abun, seq_prop, total_prop) %>%
+  #dplyr::rename(location = `location.x`, time_id = `time_id.x`, group_id = `group_id.x`) %>%
+  mutate(prop_abun = if_else(sample_abun >= 1, seq_abun/sample_abun*100, 0))
+
+#output = otu_metrics and supercedes otu_med_data
+
+```
+
+### OTU metric outputs
+
+Note the following output columns:
+*seq_abun* = absolute sequence abundance for a given taxa within the sample;
+*sample_abun* = total abundance of sequences obtained within that sample from any taxon;
+*seq_prop* = proportional sequence abundance for a certain taxon within a sample, as a percent of total sequences belonging to that taxon;
+*total_prop* = proportional sequence abundance for a certain taxon within a sample as a percent of total sequence abundance;
+*prop_abun* = proportional sequence abundance for a certain taxon as a percent of total sequences within a sample;
+
+```{r Data 7: Haplotypes}
+
+penguin_haplos = penguin_haplos_export %>% 
+  dplyr::select(-time) %>%
+  dplyr::rename(haplo_1 = `SUM.of.haplo_1`, 
+                haplo_2 = `SUM.of.haplo_2`, 
+                haplo_3 = `SUM.of.haplo_3`,
+                haplo_4 = `SUM.of.haplo_4`,
+                haplo_5 = `SUM.of.haplo_5`,
+                haplo_6 = `SUM.of.haplo_6`,
+                haplo_7 = `SUM.of.haplo_7`) %>%
+  #Renamed columns
+  reshape2::melt(id.vars=c("sample_id", "location_id", "location", "time_id", "group_id"), variable.name = "haplotype", value.name = "seq_abun") %>%
+  mutate(seq_presence = if_else(seq_abun > 0, "1", "0")) %>%
+  filter(seq_abun > 1) 
+
+penguin_haplos_sample = penguin_haplos %>%
+  separate(sample_id, c("loc", "month", "year", "sample"))
+
+penguin_haplos_sample$sample <- as.factor(penguin_haplos_sample$sample)
+
+#output = penguin_haplos_sample
+
+```
+
+## Data outputs - masters & summaries
+
+```{r Bird master}
+
+#Need to join the bird_med and bird_high datasets for graphing
+
+bird_master <- rbind(bird_med, bird_high)
+
+```
+
+```{r Penguin master}
+
+#Need to join the penguin_med and penguin_high datasets for graphing
+
+penguin_master <- rbind(penguin_med, penguin_high)
+
+```
+
+```{r Data summaries by metric}
+
+#Overall bird detection by method: need to summarise of all samples containing bird by method of detection
+#Need to scale to 100%
+
+# Bird master
+bird_sum_master <- ddply(bird_master, c("method", "metric"), summarise,
+                  `Detected` = sum(detection, na.rm=TRUE)*100/99)
+
+# Penguin master
+penguin_sum_master <- ddply(penguin_master, c("method", "metric"), summarise,
+                  `Detected` = sum(detection, na.rm=TRUE)*100/99)
+
+#Can double check this with table()
+#i.e., table(bird_long$metric, bird_long$value)
+
+```
+
+
+```{r Data summaries by location/time - total samples}
+#Overall detection by location and sampling time
+#Here we want to select just the metrics that we want to display and need to scale to 100%
+
+as.factor(bird_master$method)
+levels(bird_master$method)
+
+#0 sampling effort by time / location for Bec:
+observations = bird_med %>% 
+  group_by(location, time_id, group_id, metric) %>% 
+  dplyr::summarize(obs = n()) %>%
+  filter(metric == c('hp')) %>%
+  select(location, time_id, group_id, obs)
+
+write.csv(observations, here("data/output_data/sampling_effort.csv"))
+
+```
+
+```{r Data summaries by location/time - seabirds}
+
+#1 Bird detections by location/time
+#Summarise
+#PROBLEM = how to turn this into a percentage of samples within each location/time?
+
+bird_sum_group = bird_med %>% 
+  group_by(location, time_id, group_id, metric) %>% 
+  dplyr::summarize(obs = n(), detected = sum(detection), percentage_detected = (detected/obs*100))
+
+#Take subset for figure
+bird_master_group = bird_sum_group %>%
+  select(location, time_id, group_id, metric, obs, detected, percentage_detected) %>%
+  filter(metric == c('hp', 'dna'))
+
+```
+
+```{r Data summaries by location/time - penguins}
+
+#2 Penguin detections by location/time
+
+#Summarise
+
+penguin_sum_group = penguin_med %>% 
+  group_by(location, time_id, group_id, metric) %>% 
+  dplyr::summarize(obs = n(), detected = sum(detection), percentage_detected = (detected/obs*100))
+
+#Take subset for figure
+penguin_master_group = penguin_sum_group %>%
+  select(location, time_id, group_id, metric, obs, detected, percentage_detected) %>%
+  filter(metric == c('hp', 'dna'))
+
+```
+
+```{r OTU & HP master}
+
+#Need to join the penguin_med and penguin_high datasets for graphing
+
+otu_hp_master = otu_metrics %>%
+  dplyr::rename(`Taxa` = `OTU`) %>%
+  mutate(detect = if_else(seq_abun > 0, 1, 0)) %>%
+  full_join(hp_taxa, by= c("sample_id", "location_id", "location", "time_id", "group_id", "method", "Taxa", "detect")) %>%
+  separate(sample_id, c("loc", "month", "year", "sample")) %>%
+  select(sample, location_id, location, time_id, group_id, Taxa, method, trace_high, seq_abun, sample_abun, seq_prop, total_prop, prop_abun, detect)
+
+#Change order of levels for Taxa
+
+otu_hp_master$Taxa <- factor(otu_hp_master$Taxa, levels = c("E. minor", "Procellarid sp1", "Procellarid sp2", "Procellarid", "T. melanophris", "S. bergii", "M. serrator", "Seabird unknown"))
+otu_hp_master$method <- as.factor(otu_hp_master$method)
+otu_hp_master$sample <- as.factor(otu_hp_master$sample)
+otu_hp_master$detect <- as.integer(otu_hp_master$detect)
+
+```
+
