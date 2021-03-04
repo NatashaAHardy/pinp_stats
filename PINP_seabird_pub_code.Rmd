@@ -23,7 +23,7 @@ Project objective: to compare the detection rates of birds in long-nose fur seal
 
 ## Workspace
 
-```{r Workspace, echo=TRUE, message=FALSE,results='hide'}
+```{r Workspace, echo=TRUE, message=FALSE, results='hide'}
 
 #Check working directory - the same as the doc directory.
 
@@ -385,7 +385,7 @@ penguin_sum_master <- ddply(penguin_master, c("method", "metric"), summarise,
 ```
 
 
-```{r Data summaries by location/time - total samples}
+```{r Data summaries by location/time - total samples, message=FALSE, results='hide'}
 #Overall detection by location and sampling time
 #Here we want to select just the metrics that we want to display and need to scale to 100%
 
@@ -403,7 +403,7 @@ write.csv(observations, here("data/output_data/sampling_effort.csv"))
 
 ```
 
-```{r Data summaries by location/time - seabirds}
+```{r Data summaries by location/time - seabirds, message=FALSE, results='hide'}
 
 #1 Bird detections by location/time
 #Summarise
@@ -420,7 +420,7 @@ bird_master_group = bird_sum_group %>%
 
 ```
 
-```{r Data summaries by location/time - penguins}
+```{r Data summaries by location/time - penguins, message=FALSE, results='hide'}
 
 #2 Penguin detections by location/time
 
@@ -457,3 +457,142 @@ otu_hp_master$detect <- as.integer(otu_hp_master$detect)
 
 ```
 
+
+## MS Figures
+
+**Note on figures in MS:**
+
+- Figure 1 was prepared by Harley at PINP using QGIS software. 
+
+- Figure 2 is a composite panel of photos by Natasha Hardy & Rebecca McIntosh.
+
+
+### Bar plots for MS:
+
+**- Figure 3a** aims to display the proportion of samples detecting seabirds using either hard-part methods, DNA-based methods, both combined or either of those methods.
+
+```{r Figure 3a Bird detections / metric}
+
+#Figure 3a
+
+#Figure 3 colour palette
+fig3.pal <- pnw_palette(5, name = "Bay", type = "continuous")
+
+#Relevel the method so that hard-part method comes first in the graph AND relabel
+#levels(bird_sum_master$method) #check levels
+bird_sum_master$method <- factor(bird_sum_master$method, levels = c("hard part", "DNA standard QC", "DNA stringent QC"), label = c("hard parts", "DNA (all)", "DNA (abundant)"))
+
+#Relabel to clarify calculations
+#levels(bird_sum_master$metric) # check levels
+bird_sum_master$metric <- factor(bird_sum_master$metric, levels = c("hp", "dna", "dna_or_hp", "same_taxon"), label = c("hp", "dna", "dna or hp", "same taxon"))
+
+#Figure 3a
+fig3a_bird <- ggplot(bird_sum_master, aes(x=metric, y=Detected, fill=metric)) +
+  geom_bar(stat="identity", position="dodge", width=1)+
+  ggtitle("a) Seabird detections by metric")+
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), 
+        plot.title=element_text(size=18), #face="bold", 
+        axis.title=element_blank(), #element_text(size=18)
+        axis.text=element_text(size=18), 
+        axis.text.x=element_blank(),
+        legend.text=element_text(size=16), 
+        legend.title=element_text(size=16), 
+        legend.position="bottom"
+        ) +
+  ylim(0,50)+
+  #theme(legend.position=c(0.60,0.80), legend.justification=c(0.4,0.5))+
+  scale_fill_manual(values=fig3.pal)+
+  guides(fill=FALSE) +
+  #guides(fill=guide_legend(title="Containing:"))+
+  #labs(x=NULL, y="Percentage of samples (%)") + #x="Metric", 
+  facet_grid(.~method, scales="free",space='free') +
+  theme(strip.text = element_text(size=rel(1.25)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+fig3a_bird
+
+#ggsave(here('figures/Final versions/fig3a_bird.jpeg'), plot = fig3a_bird, width = 9, height = 5, dpi = 300)
+
+```
+
+**- Figure 3b** aims to display the proportion of samples detecting penguins using either hard-part methods, DNA-based methods, both combined or either of those methods.
+
+```{r Figure 3b Penguin detections / metric}
+
+#Figure 3b
+
+#Relevel the method so that hard-part method comes first in the graph
+#levels(penguin_sum_master$method)
+penguin_sum_master$method <- factor(penguin_sum_master$method, levels = c("hard part", "DNA standard QC", "DNA stringent QC"))
+
+#Relabel to clarify
+penguin_sum_master$method <- factor(penguin_sum_master$method, levels = c("hard part", "DNA standard QC", "DNA stringent QC"), label = c("hard parts", "DNA (all)", "DNA (abundant)"))
+
+#levels(penguin_sum_master$metric)
+penguin_sum_master$metric <- factor(penguin_sum_master$metric, levels = c("hp", "dna", "dna_or_hp", "same_taxon"), label = c("hp", "dna", "dna or hp", "same taxon"))
+
+#Figure 3b
+fig3b_penguin <- ggplot(penguin_sum_master, aes(x=metric, y=Detected, fill=metric)) +
+  geom_bar(stat="identity", position="dodge", width=1)+
+  ggtitle("b) Penguin detections by metric")+
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), 
+        plot.title=element_text(size=18), #face="bold", 
+        axis.title=element_blank(), #element_text(size=18)
+        axis.text=element_text(size=18), 
+        axis.text.x=element_blank(),
+        legend.text=element_text(size=16), 
+        legend.title=element_text(size=16), 
+        legend.position="bottom"
+        ) +
+  #theme(legend.position=c(0.60,0.80), legend.justification=c(0.4,0.5))+
+  ylim(0,50)+
+  scale_fill_manual(values=fig3.pal)+
+  guides(fill=guide_legend(title="Containing:"))+
+  labs(x=NULL, y="Percentage of samples (%)") + #x="Metric", 
+  facet_grid(.~method, scales="free",space='free') +
+  theme(strip.text = element_text(size=rel(1.25)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+fig3b_penguin
+
+#ggsave(here('figures/Final versions/fig3b_penguin.jpeg'), plot = fig3b_penguin, width = 9, height = 5, dpi = 300)
+
+
+```
+
+**- Figure 3** - merges panels a and b, and displays the overall detection rates for seabirds and penguins according the method of scat analysis.
+
+```{r Figure 3 PANEL - summary stats}
+
+#Merge the following plots into a single panel
+#fig3a_bird & fig3b_penguin
+
+#create common axis titles
+y.grob <- textGrob("Percentage of samples (%)", gp=gpar(fontsize=18), rot=90) #fontface="bold", col="blue", 
+#x.grob <- textGrob("Percentage of samples containing remains (%)", gp=gpar(fontsize=18)) #fontface="bold", col="blue", 
+
+#combine using cowplot
+fig3_panel = plot_grid(fig3a_bird, fig3b_penguin, 
+                       #align = "h",
+                       nrow = 2
+                          #labels = c("a) Seabirds", "b) Little penguins (Eudyptula minor)"), 
+                          #label_size = 18, ncol = 2, 
+                          #label_x = 0.20, label_y = 1, hjust = 0, vjust = 1.5,
+                          #scale = 0.95,
+                          #label_x = 0.10, vjust = 1, rel_widths = c(1, 1), align = "v", 
+                          #greedy = TRUE
+                          ) #hjust = -7.5, label_x = c(0.12, 0.12, 0.12, 0.12, 0.12, 0.12)
+
+#fig3_panel # check this
+
+#add to plot
+fig3_panel_ms = grid.arrange(arrangeGrob(fig3_panel, left = y.grob, padding = unit(1, "line")))
+fig3_panel_ms
+
+#ggsave(here("figures/Final versions/fig3_panel_ms.jpeg"), plot = fig3_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
+
+#ggsave(here("figures/Final versions/fig3_panel_ms.pdf"), plot = fig3_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
+
+```
