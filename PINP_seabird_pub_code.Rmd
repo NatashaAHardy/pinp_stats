@@ -98,6 +98,7 @@ penguin_haplos_export <- read.csv(here("data/input_data/penguin_haplos.csv"), he
 ```
 
 
+
 ## Data manipulations
 
 Here we mainly clean column or variable names, gather wide data and change to longform.
@@ -348,6 +349,7 @@ penguin_haplos_sample$sample <- as.factor(penguin_haplos_sample$sample)
 
 ```
 
+
 ## Data outputs - masters & summaries
 
 ```{r Bird master}
@@ -384,13 +386,11 @@ penguin_sum_master <- ddply(penguin_master, c("method", "metric"), summarise,
 
 ```
 
-
 ```{r Data summaries by location/time - total samples, message=FALSE, results='hide'}
 #Overall detection by location and sampling time
 #Here we want to select just the metrics that we want to display and need to scale to 100%
 
 as.factor(bird_master$method)
-levels(bird_master$method)
 
 #0 sampling effort by time / location for Bec:
 observations = bird_med %>% 
@@ -399,7 +399,7 @@ observations = bird_med %>%
   filter(metric == c('hp')) %>%
   select(location, time_id, group_id, obs)
 
-write.csv(observations, here("data/output_data/sampling_effort.csv"))
+#write.csv(observations, here("data/output_data/sampling_effort.csv"))
 
 ```
 
@@ -456,6 +456,7 @@ otu_hp_master$sample <- as.factor(otu_hp_master$sample)
 otu_hp_master$detect <- as.integer(otu_hp_master$detect)
 
 ```
+
 
 
 ## MS Figures
@@ -589,10 +590,812 @@ fig3_panel = plot_grid(fig3a_bird, fig3b_penguin,
 
 #add to plot
 fig3_panel_ms = grid.arrange(arrangeGrob(fig3_panel, left = y.grob, padding = unit(1, "line")))
-fig3_panel_ms
 
 #ggsave(here("figures/Final versions/fig3_panel_ms.jpeg"), plot = fig3_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
 
 #ggsave(here("figures/Final versions/fig3_panel_ms.pdf"), plot = fig3_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
+
+```
+
+**- Figure 5a** depicts seabird percentage detections by location & time (using all DNA obtained through standard DNA QC)
+
+```{r Figure 5a - data manip, eval=FALSE}
+#Figure 5a
+#Colour palette
+fig5.pal <- pnw_palette(2, name = "Bay", type = "continuous")
+
+#Need to exclude Deen Maar (LJP) in percentages
+
+bird_master_group2 = bird_master_group %>%
+  filter(location != "Deen Maar")
+
+#Check & relevel factors as needed
+l#evels(bird_master_group2$location)
+bird_master_group2$location <- factor(bird_master_group2$location, 
+                                      levels = c("Cape Bridgewater", "Gabo Island", "Deen Maar", "Barunguba"), 
+                                      labels = c("Cape Bridgewater", "Gabo Isl.", "Deen Maar", "Barunguba"))  
+
+#levels(bird_master_group2$time_id)
+```
+
+```{r Figure 5a - Bird % detections / location, eval=FALSE}
+#Figure 5a
+fig5a_bird <- ggplot(bird_master_group2, aes(x=time_id, y=percentage_detected, fill=metric)) +
+  geom_bar(stat="identity",position="dodge")+
+  coord_flip()+
+  ylim(0,75)+
+  theme_classic() + 
+  ggtitle("a) Seabird detections")+
+  theme(panel.grid.major = element_blank(), plot.title=element_text(size=18),
+        axis.title=element_blank(), axis.text=element_text(size=18),
+        legend.text=element_text(size=16), legend.title=element_text(size=16) 
+        ) + 
+  #theme(axis.text.x=element_blank(), legend.position="top")+
+  theme(legend.position=c(0.85,0.75), legend.justification=c(0.4,0.5))+
+  scale_fill_manual(values=fig5.pal)+
+  guides(fill=FALSE)+ #Remove legend for plotting alongside bird figure #guide_legend(title="Metric:")
+  #labs(x="Sample time", y="Percentage of samples containing remains (%)") + #title ="a) Number of samples detecting seabirds",
+  facet_grid(location~., scales="free", space='free') +
+  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+fig5a_bird
+
+#ggsave(here('figures/Final versions/fig5a_bird_pdetect_location.jpeg'), plot = fig5a_bird, width = 8, height = 9, dpi = 300)
+
+```
+
+**- Figure 5b** depicts penguin percentage detections by location & time (using all DNA obtained through standard DNA QC)
+
+```{r Figure 5b Penguin % detections / location, eval = FALSE}
+#Figure 5b
+#Need to exclude Deen Maar in percentages
+penguin_master_group2 = penguin_master_group %>%
+  filter(location != "Deen Maar")
+
+#levels(penguin_master_group2$location)
+
+penguin_master_group2$location <- factor(penguin_master_group2$location, 
+                                         levels = c("Cape Bridgewater", "Gabo Island", "Deen Maar", "Barunguba"), 
+                                         labels = c("Cape Bridgewater", "Gabo Isl.", "Deen Maar", "Barunguba"))
+
+levels(penguin_master_group2$time_id)
+
+#Figure 5b
+fig5b_penguin <- ggplot(penguin_master_group2, aes(x=time_id, y=percentage_detected, fill=metric)) +
+  geom_bar(stat="identity",position="dodge")+
+  coord_flip()+
+  ylim(0,75)+
+  theme_classic() + 
+  ggtitle("b) Little penguin (E. minor) detections")+
+  theme(panel.grid.major = element_blank(), plot.title=element_text(size=18),
+        axis.title=element_blank(), axis.text=element_text(size=18),
+        legend.text=element_text(size=18), legend.title=element_text(size=18)
+        ) + 
+  #theme(axis.text.x=element_blank(), legend.position="top")+
+  theme(legend.position=c(0.85,0.85), legend.justification=c(0.4,0.5))+
+  scale_fill_manual(values=fig5.pal)+
+ guides(fill=guide_legend(title="Metric:"))+
+  #labs(x="Sample time", y="Percentage of samples containing remains (%)") + #title ="a) Number of samples detecting seabirds",
+  facet_grid(location~., scales="free", space='free') +
+  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+
+fig5b_penguin
+
+#ggsave('figures/Final versions/fig5b_penguin_pdetect_location.jpeg', plot = fig5b_penguin, width = 8, height = 9, dpi = 300)
+
+
+```
+
+**- Figure 5** Includes both pannels for a) seabird and b) penguin percentage detections at sampling sites and seasons.
+
+```{r Figure 5 PANEL - location~time, eval = FALSE}
+
+#Merge the following plots into single panel plot
+#fig5a_bird & fig5b_penguin
+
+#create common axis titles
+y.grob <- textGrob("Sample date", gp=gpar(fontsize=18), rot=90) #fontface="bold", col="blue", 
+x.grob <- textGrob("Percentage of samples containing remains (%)", gp=gpar(fontsize=18)) #fontface="bold", col="blue", 
+
+#combine using cowplot
+bird_panel_ms = plot_grid(fig5a_bird, fig5b_penguin, 
+                           ncol = 2
+                          #labels = c("a) Seabirds", "b) Little penguins (Eudyptula minor)"), 
+                          #label_size = 18, ncol = 2, 
+                          #label_x = 0.20, label_y = 1, hjust = 0, vjust = 1.5,
+                          #scale = 0.95,
+                          #label_x = 0.10, vjust = 1, rel_widths = c(1, 1), align = "v", 
+                          #greedy = TRUE
+                          ) #hjust = -7.5, label_x = c(0.12, 0.12, 0.12, 0.12, 0.12, 0.12)
+
+#add to plot
+bird_panel_ms = grid.arrange(arrangeGrob(bird_panel_ms, left = y.grob, bottom = x.grob, padding = unit(1, "line")))
+
+#ggsave(here("figures/Final versions/fig5_panel_ms.pdf"), plot = bird_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
+
+#ggsave(here("figures/Final versions/fig5_panel_ms.jpeg"), plot = bird_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
+
+```
+
+**- Figure S3a** depicts seabird total (absolute) detections by location & time (using all DNA obtained through standard DNA QC) - for ESM.
+
+```{r Figure S3a Bird detections / location, eval = FALSE}
+#Bird detections by location & time (standard DNA QC)
+#For use in ESM
+
+#Figure S2a
+figS3a_bird <- ggplot(bird_master_group2, aes(x=time_id, y=detected, fill=metric)) +
+  geom_bar(stat="identity",position="dodge")+
+  coord_flip()+
+  ylim(0,8)+
+  ggtitle("a) Seabird detections")+
+  theme_classic() + 
+  theme(panel.grid.major = element_blank(), plot.title=element_text(size=18),
+        axis.title=element_blank(), axis.text=element_text(size=18),
+        legend.text=element_text(size=16), legend.title=element_text(size=16), 
+        ) + 
+  #theme(axis.text.x=element_blank(), legend.position="top")+
+  theme(legend.position=c(0.75,0.38), legend.justification=c(0.4,0.5))+
+  scale_fill_manual(values=fig5.pal)+
+  guides(fill=FALSE)+ #Remove legend for plotting alongside bird figure #guide_legend(title="Metric:")
+  #guides(fill=guide_legend(title="Metric:"))+
+  #labs(x="Sample time", y="Detections (number of samples containing remains)") + #title ="a) Number of samples detecting seabirds", 
+  facet_grid(location~., scales="free", space='free') +
+  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+figS3a_bird
+
+#ggsave('figures/ESM/figS3a_birddetect_location.jpeg', plot = figS3a_bird, width = 8, height = 10, dpi = 300)
+
+
+```
+
+**- Figure S3b** depicts penguin total (absolute) detections by location & time (using all DNA obtained through standard DNA QC) - for ESM.
+
+```{r Figure S3b Penguin detections / location, eval = FALSE}
+#Penguin detections by location & time (standard DNA QC)
+#For ESM
+
+#Figure S3b
+figS3b_penguin <- ggplot(penguin_master_group2, aes(x=time_id, y=detected, fill=metric)) +
+  geom_bar(stat="identity",position="dodge")+
+  coord_flip()+
+  ylim(0,8)+
+  ggtitle("b) Little penguin (E. minor) detections")+
+  theme_classic() + 
+  theme(panel.grid.major = element_blank(), 
+        plot.title=element_text(size=18),
+        axis.title=element_blank(), 
+        axis.text=element_text(size=18),
+        legend.text=element_text(size=16), 
+        legend.title=element_text(size=16), 
+        ) + 
+  #theme(axis.text.x=element_blank(), legend.position="top")+
+  theme(legend.position=c(0.75,0.38), legend.justification=c(0.4,0.5))+
+  scale_fill_manual(values=fig5.pal)+
+  guides(fill=guide_legend(title="Metric:"))+
+  #guides(fill=FALSE)+ #Remove legend for plotting alongside bird figure #guide_legend(title="Metric:")
+  #labs(x="Sample time", y="Detections (number of samples containing remains)") + #title ="a) Number of samples detecting seabirds", 
+  facet_grid(location~., scales="free", space='free') +
+  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+  
+figS3b_penguin
+
+#ggsave('figures/ESM/figS3b_penguin_detect_location.jpeg', plot = figS3b_penguin, width = 8, height = 10, dpi = 300)
+
+
+```
+
+**- Figure S3** Includes both panels for a) seabird and b) penguin total (absolute) detections at sampling sites and seasons. For ESM.
+
+```{r Figure S3 ESM Plot Panel - location~time, eval = FALSE}
+
+#Merge the following plots into a single panel
+#figS3a_bird & figS3b_penguin
+
+#create common axis titles
+yS1.grob <- textGrob("Sample date", gp=gpar(fontsize=18), rot=90) #fontface="bold", col="blue", 
+xS1.grob <- textGrob("Detections (number of samples containing remains)", gp=gpar(fontsize=18)) #fontface="bold", col="blue", 
+
+#combine using cowplot
+figS3_panel_esm = plot_grid(figS3a_bird, figS3b_penguin, 
+                           ncol = 2)
+
+#add to plot
+bird_panel_esm = grid.arrange(arrangeGrob(figS3_panel_esm, left = yS1.grob, bottom = xS1.grob, padding = unit(1, "line")))
+
+#ggsave("figures/ESM/figS3_bird_panel_esm.pdf", plot = bird_panel_esm, width = 14, height = 12, scale = 0.95, dpi = 300)
+
+#ggsave("figures/ESM/figS3_bird_panel_esm.jpeg", plot = bird_panel_esm, width = 14, height = 12, scale = 0.95, dpi = 300)
+
+```
+
+### OTU figures
+
+**- OTU palles** created to associated each taxon with a specific colour scheme throughout the OTU graphs.
+
+```{r OTU Figure Palettes, eval = FALSE}
+
+#Colour palette
+figX.pal <- pnw_palette(9, name = "Sunset", type = "continuous") 
+show_col(figX.pal)
+
+#Assign
+#E. minor = "#41476B" 
+#Procellarid = "#825B75"
+#Procellarid sp1 = "#A86972"
+#Procellarid sp2 = "#C67B6F"
+#"T. melanophris" = "#D89370"
+#"S. bergii" = "#E6AB79"
+#"M. serrator" = "#F2C48A"
+#"Seabird unknown" = "#FBDFA2"
+
+fig4a.pal <- c("#41476B", "#825B75", "#F2C48A", "#FBDFA2")
+show_col(fig4a.pal)
+fig4b.pal <- c("#41476B", "#A86972", "#C67B6F", "#D89370", "#E6AB79")
+show_col(fig4b.pal)
+
+
+
+```
+
+**- Figure 4a** illustration of taxa detected (presence) within samples using hard-part analyses.
+
+```{r Figure 4a HP detections by seabird taxa, eval = FALSE}
+#Colour palette #use fig4a.pal
+
+#Graph with tick labels or without
+fig4a_hptaxa = otu_hp_master %>% 
+  filter(detect > 0, method == "hard-parts") %>% 
+  #Manipulate data to include only samples that contained DNA
+  ggplot() +
+  geom_bar(aes(x=time_id:sample, y=detect, fill=Taxa), stat="identity", position="dodge")+
+  #scale_y_discrete(breaks= NULL) +
+  coord_flip()+
+  theme_classic() + 
+  theme(panel.grid.major = element_blank(), 
+        axis.ticks = element_blank(),
+        plot.title=element_text(size=18), #face="bold", 
+        #axis.title.x=element_text(size=18), 
+        axis.title.y=element_blank(),
+        axis.text=element_text(size=18),
+        axis.text.x=element_blank(),
+        legend.text=element_text(size=18), 
+        legend.title=element_text(size=18)
+        ) + 
+  theme(legend.position=c(0.20,0.10), legend.justification=c(0.5,0.5)) +
+  scale_fill_manual(values=fig4a.pal, name="Taxa:") +
+  labs(title ="a) Hard-part detections", y = "") + 
+  #x="Individual sample & Sampling time", y="Presence of seabird remains in samples"
+  facet_grid(location~., scales="free", space='free') +
+  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+
+fig4a_hptaxa
+
+#ggsave('figures/Final versions/fig4a_hptaxa_RRA_label.pdf', plot = fig4a_hptaxa, width = 12, height = 12, dpi = 300)
+
+
+```
+
+**- Figure 4a** illustration of taxa detected (presence) within samples using DNA analyses.
+
+```{r Figure 4b DNA detections by seabird taxa, eval = FALSE}
+
+### Figure 4b dna detections seabird presence/absence
+fig4b_dna_detect = otu_hp_master %>%
+  filter(detect > 0, method == "DNA standard QC") %>%
+  ggplot() +
+  geom_bar(aes(x=time_id:sample, y=detect, fill=Taxa), stat="identity", position="dodge")+
+  coord_flip()+
+  theme_classic() + 
+  theme(panel.grid.major = element_blank(), 
+        axis.ticks = element_blank(),
+        plot.title=element_text(size=18), #face="bold", 
+        #axis.title.x=element_text(size=18), 
+        axis.title.y=element_blank(),
+        axis.text=element_text(size=18), 
+        axis.text.x=element_blank(),
+        legend.text=element_text(size=18), 
+        legend.title=element_text(size=18)
+        ) + 
+  theme(legend.position=c(0.20,0.10), legend.justification=c(0.5,0.5)) +
+  scale_fill_manual(values=fig4b.pal, name="Taxa:")+
+  #guides(fill=guide_legend(title=))+
+  labs(title ="b) DNA-based detections", y = "") + # Axis labels
+  #, y="Presence of seabird remains in samples"
+  facet_grid(location~., scales="free", space='free') +
+  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+fig4b_dna_detect
+
+#ggsave('figures/Final versions/fig4b_dna_detect.pdf', plot = fig4b_dna_detect, width = 12, height = 12, dpi = 300)
+
+```
+
+**- Figure 4** panel illustration of taxa detected (presence) within samples using a) hard-part and b) DNA-based analyses.
+
+```{r Figure 4 PANEL - detection taxa ~ method, eval = FALSE}
+
+#Need the following plots
+#fig4a_hptaxa and fig4b_dna_detect
+
+#create common axis titles
+y4.grob <- textGrob("Sample date: sample number", gp=gpar(fontsize=20), rot=90) #fontface="bold", col="blue", 
+x4.grob <- textGrob("Presence of seabird taxa in samples", gp=gpar(fontsize=20)) #fontface="bold", col="blue", 
+
+#Combine plots
+fig4_panel_test=grid.arrange(fig4a_hptaxa, #+  theme(legend.position=c(0.5, 0.90) 
+                        fig4b_dna_detect, #+ theme(legend.position=c(0.5, 0.90)) 
+                        #fig4c_otu_abun + theme(legend.position=c(0.5, 0.90)), #put in ESM Fig. S1
+                        nrow=1)
+
+fig4_panel_ms = grid.arrange(arrangeGrob(fig4_panel_test, left = y4.grob, bottom = x4.grob, padding = unit(1, "line")))
+
+#ggsave("figures/Final versions/fig4_panel.pdf", plot = fig4_panel_ms, width = 20, height = 14, scale = 0.95, dpi = 300)
+
+#ggsave("figures/Final versions/fig4_panel.jpeg", plot = fig4_panel_ms, width = 20, height = 14, scale = 0.95, dpi = 300)
+
+```
+
+**- Figure S1** illustration of taxa detected using DNA-based analyses and their total sequence abundance within samples. For ESM.
+
+```{r Figure S1 DNA detections by seabird taxa abundance, eval = FALSE}
+
+#Can exclude samples containing < 40 seqs or other cut-off if needed
+#test = otu_hp_master %>%
+#  filter(seq_abun >= 40, method == "DNA standard QC")
+
+#Figure S1 - most abundant sequences
+figS1_otu_abun = otu_hp_master %>%
+  filter(seq_abun > 1, method == "DNA standard QC") %>%
+  mutate(trace_high = factor(if_else(seq_abun >= 30, "high", "trace"), levels = c("trace", "high"))) %>% #Add trace vs. high DNA abundance
+  ggplot() +
+  geom_bar(aes(x=time_id:sample, y=seq_abun, fill=Taxa), stat="identity", position = "dodge", width = 0.75) + 
+  coord_flip() +
+  theme_classic() + 
+  theme(panel.grid.major = element_blank(), 
+        axis.ticks.y = element_blank(),
+        plot.title=element_text(size=18), #face="bold", 
+        axis.title.x=element_text(size=18), 
+        axis.title.y=element_text(size=18),
+        axis.text=element_text(size=18), #axis.text.y=element_blank(),
+        legend.text=element_text(size=18), 
+        legend.title=element_text(size=18)
+        ) + 
+  theme(legend.position=c(0.75,0.90), legend.justification=c(0.5,0.5)) +
+#  theme(legend.position=c(0.20,0.10), legend.justification=c(0.5,0.5)) +
+  scale_fill_manual(values=fig4b.pal, name="Taxa:") +
+  #guides(fill=guide_legend(title=))+
+  labs(x="Sample date: sample number", y="Total sequence abundance (n)") + # Axis labels #title ="c) Abundance of DNA detected", 
+  facet_grid(location ~ trace_high, scales="free", space='free_y') + 
+  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+figS1_otu_abun
+
+#Save as jpeg
+#ggsave('figures/ESM/figS1_otu_abun.pdf', plot = figS1_otu_abun, width = 12, height = 12, dpi = 300)
+#In pdf:
+#Need to italicise a portion of species names
+```
+
+**- Figure SX** not included in MS or ESM - this was to illustrate the relative contribution of seabirds to each sample in relation to the DNA abundance recovered across the total.
+
+```{r Figure SX OTU Proportional Read Abun by OTU, eval = FALSE}
+
+#Figure X - extra
+figSX_otu_RRA <- otu_hp_master %>%
+  filter(seq_abun >= 1, method == "DNA standard QC") %>%
+  ggplot() +
+  geom_bar(aes(x=time_id:sample, y=seq_prop, fill=Taxa), stat="identity") +  
+  #ggplot(otu_med_abundant, aes(x=time_id:sample_id, y=seq_prop, fill=OTU)) +
+  #geom_bar(stat="identity",position="dodge")+
+  coord_flip()+
+  theme_classic() + 
+  theme(panel.grid.major = element_blank(), 
+        axis.ticks.y = element_blank(),
+        plot.title=element_text(face="bold", size=18),
+        axis.title=element_text(size=18), 
+        axis.text=element_text(size=18), 
+        #axis.text.y=element_blank(),
+        legend.text=element_text(size=16), 
+        legend.title=element_text(size=16)#,
+        #legend.position="top"
+        ) + 
+  theme(legend.position=c(0.75,0.25), legend.justification=c(0.4,0.5))+
+  scale_fill_manual(values=fig4b.pal, name="Taxa:")+
+  labs(x="Individual sample / Sampling time", y="Relative DNA abudance (%)") + # Axis labels
+  #title ="a) Total sequence abundance (n) of seabirds across samples and locations", 
+  #facet_zoom(ylim = c(0, 5))+
+  facet_grid(location~., scales="free", space='free') +
+  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+figSX_otu_RRA
+
+#ggsave('figures/ESM/figSX_otu_totalRA.pdf', plot = figSX_otu_RRA, width = 8, height = 12, dpi = 300)
+
+```
+
+**- Figure S2** to illustrate the proportional abundance of sequences per taxon per sample, also known as the relative rea abundance (Thomas & Deagle, et al. 2019). For ESM.
+
+```{r Figure S2 OTU Relative Read Abun by Total per Sample, eval = FALSE}
+
+## We want a graph displaying the proportional abundance of sequences per sample, with time on the x-axis and proportion on the y-axis
+## Similar to my excel mock-up graph
+
+#Manipulate data
+
+otu_rra = otu_metrics %>% 
+  separate(sample_id, c("loc", "month", "year", "sample")) %>%
+  select(location:prop_abun) %>%
+  #mutate(seq_pa = if_else(seq_abun > 0, 1, 0)) %>%
+  filter(seq_abun > 1)
+
+otu_rra$sample <- as.factor(otu_rra$sample)
+
+#Graph with tick labels or without
+
+figS2_otu_RRA = otu_rra %>%
+  ggplot() +
+  geom_bar(aes(x=time_id:sample, y=prop_abun, fill=OTU), stat="identity")+
+  coord_flip()+
+  theme_classic() + 
+  theme(panel.grid.major = element_blank(), 
+        axis.ticks.y = element_blank(),
+        plot.title=element_text(face="bold", size=18),
+        axis.title=element_text(size=18), 
+        axis.text=element_text(size=18), 
+        legend.text=element_text(size=16), 
+        legend.title=element_text(size=16),
+        legend.position="top"
+        ) + 
+  scale_fill_manual(values=fig4b.pal, name="Taxa:")+
+  labs(x="Sample date: sample number", y="Relative DNA abundance (%)") + # Axis labels
+  facet_grid(location~., scales="free", space='free') +
+  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+figS2_otu_RRA
+
+#ggsave('figures/ESM/figS2_otu_RRA.pdf', plot = figS2_otu_RRA, width = 12, height = 12, dpi = 300)
+
+```
+
+**- Figure 7** Little penguin haplotype diversity within samples containing DNA for little penguin (n = 10), using the primer for 12S rRNA gene. The genetic abundance of haplotypes identified is overlaid. Each haplotype within a sample represents an individual penguin consumed. 
+
+```{r Figure 7 HAPLOTYPES PER SAMPLE, eval=FALSE}
+
+#Little penguin haplotype presence in samples, including haplotype abundance data
+
+#Colour palette
+fig7.pal <- pnw_palette(8, name = "Sunset", type = "continuous")
+
+## We want a graph displaying the proportional abundance of sequences per sample, with time on the x-axis and proportion on the y-axis
+## Similar to my excel mock-up graph
+
+fig7_haplo_presence = penguin_haplos_sample %>%
+  #penguin_haplos %>%
+  filter(seq_abun > 1) %>%
+  ggplot(aes(x=time_id:sample, y=seq_presence, fill=haplotype)) +
+  coord_flip()+
+  geom_bar(stat="identity")+
+  geom_text(aes(label=seq_abun, 
+                #vjust=0,
+                #hjust=2
+                ),
+            colour="white",
+            size=6,
+            position = position_stack(vjust = 0.5)) + #xlab("")
+  theme_classic() + 
+  theme(panel.grid.major = element_blank(), 
+        axis.ticks.x = element_blank(),
+        plot.title=element_text(face="bold", size=18),
+        axis.title=element_text(size=18), 
+        axis.text.y =element_text(size=18), 
+        axis.text.x =element_blank(), 
+        legend.text=element_text(size=16), 
+        legend.title=element_text(size=16),
+        legend.position="top"
+        ) + 
+  scale_fill_manual(values=figS3.pal, name="Haplotype:")+
+  labs(x="Sample date: sample number", y="Little penguin haplotypes & sequence abundance") + # Axis labels
+  facet_grid(location~., scales="free", space='free') +
+  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+fig7_haplo_presence
+
+#ggsave(here('figures/Final versions/fig7_haplo_presence.pdf'), plot = fig7_haplo_presence, width = 10, height = 10, dpi = 300)
+
+#ggsave(here('figures/Final versions/fig7_haplo_presence.jpg'), plot = fig7_haplo_presence, width = 10, height = 10, dpi = 300)
+
+```
+
+**- Figure 7X** Extra graph - bubble graph version of above - Little penguin haplotype diversity within samples containing DNA for little penguin (n = 10), using the primer for 12S rRNA gene. The genetic abundance of haplotypes identified is overlaid. Each haplotype within a sample represents an individual penguin consumed. 
+
+```{r Figure 7 extra HAPLOTYPES Bubble Graph, eval=FALSE}
+
+#Here we want to make a bubble plot
+
+figS4_haplo_bubble = penguin_haplos %>%
+  filter(seq_abun > 1) %>%
+  ggplot(aes(x=time_id:sample_id, y=seq_presence, fill=haplotype, colour=haplotype, size=seq_abun)) + #, 
+  geom_point(position="stack") + 
+  geom_text(aes(label=seq_abun, #rev(seq_abun) this appeared to completely reorder the seq data all over the graph
+                #vjust=0.5,
+                #hjust=2
+                ),
+            #colour="#333333",
+            colour="white",
+            size=6,
+            position = position_stack(vjust = 1)) + 
+  coord_flip() +
+  theme_classic() + 
+  theme(panel.grid.major = element_blank(), 
+        axis.ticks.x = element_blank(),
+        plot.title=element_text(face="bold", size=18),
+        axis.title=element_text(size=18), 
+        axis.text.y =element_text(size=18), 
+        axis.text.x =element_blank(), 
+        legend.text=element_text(size=16), 
+        legend.title=element_text(size=16),
+        legend.position="top") + 
+  scale_fill_manual(values=figS3.pal, name="Haplotype:")+
+  scale_colour_manual(values=figS3.pal, name="Haplotype:")+ 
+  scale_size(range = c(12, 32),
+             guide=FALSE) + 
+  guides(colour = guide_legend(override.aes = list(size=10)))+
+  labs(x="Sample date: sample number", y="Little penguin haplotypes & sequence abundance") + # Axis labels
+  facet_grid(location~., scales="free", space='free') +
+  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+figS4_haplo_bubble
+
+#ggsave(here('figures/ESM/figS4_haplo_bubble.pdf'), plot = figS4_haplo_bubble, width = 10, height = 10, dpi = 300)
+
+```
+
+## Statistical Analyses
+
+We aim to test the hypothesis that bird or penguin detections will vary using different methods and combinations of these methods (here referred to as "metric").
+Experimental design/formula, as a minimum: detection ~ metric
+These data are binomial and seem to have violated assumptions for simpler tests + ANOVA. So we are running a binomial regression (glm with family=binomial)
+How to incorporate the group_id, location or time for this?
+Note that for each group_id we have replication of each treatment (metric) value being DNA or HP method used.
+Location and time are effective random.
+
+The Analysis Factor have some simple reminders about how to treat factors --> comes down to our explicit hypotheses. https://www.theanalysisfactor.com/the-difference-between-crossed-and-nested-factors/
+
+Here we subset the dataframe as needed for analyses. 
+
+```{r Checking & Selecting Data, eval=FALSE}
+
+#Data distributions
+dotchart(bird_med$detection)
+
+#Histogram
+hist(bird_med$detection)
+
+#Exclude LJP (Deen Maar) from analyses, as well as stringent QC because we don't want to compare that.
+
+bird_master_test = bird_master %>%
+  select(location, time_id, group_id, metric, method, detection) %>%
+  dplyr::filter(metric == c('hp', 'dna'), location != "Deen Maar", method != "DNA stringent QC")
+
+penguin_master_test = penguin_master %>%
+  select(location, time_id, group_id, metric, method, detection) %>%
+  dplyr::filter(metric == c('hp', 'dna'), location != "Deen Maar", method != "DNA stringent QC")
+
+#Relevelling factors: we logically want CB Sept_15 to be the reference point because it is the earliest time point
+levels(bird_master_test$group_id)
+bird_master_test$group_id <- factor(bird_master_test$group_id, levels = c("CB_Sep_15","CB_Jan_16","CB_Sep_16","CB_Jan_17","GI_Jan_17","LJP_Mar_17", "MI_Sep_16", "MI_Jan_17"))
+
+levels(penguin_master_test$group_id)
+penguin_master_test$group_id <- factor(penguin_master_test$group_id, levels = c("CB_Sep_15","CB_Jan_16","CB_Sep_16","CB_Jan_17","GI_Jan_17","LJP_Mar_17", "MI_Sep_16", "MI_Jan_17"))
+
+```
+
+### BIRD MODELS
+
+The interaction term was not significant (p > 0.07), and whilst small, there were no significant pairwise interactions, we therefore remove this term from the model.
+
+```{r GLM Bird 1 --> detection ~ metric * group_id, eval=FALSE}
+
+#Bird binomial GLMs for detection of birds ~ metric * sample group
+bird_model_1 <- glm(detection ~ metric*group_id, family = binomial, data = bird_master_test)
+anova(bird_model_1, test = "Chisq")
+summary(bird_model_1)
+
+#Output for bird_model_med
+
+#Analysis of Deviance Table
+#Model: binomial, link: logit
+#Response: detection
+#Terms added sequentially (first to last)
+#                Df Deviance Resid. Df Resid. Dev Pr(>Chi)  
+#NULL                               99    114.611           
+#metric           1   0.2081        98    114.403  0.64829  
+#group_id         6  15.4554        92     98.948  0.01700 *
+#metric:group_id  6  11.5098        86     87.438  0.07384 .
+
+##UPDATE STILL NS
+
+#Call:
+#glm(formula = detection ~ metric * group_id, family = binomial, data = bird_master_test)
+#Deviance Residuals: 
+#     Min        1Q    Median        3Q       Max  
+#-1.01077  -0.84460  -0.51678  -0.00022   2.44775  
+#Coefficients:
+#                             Estimate Std. Error z value Pr(>|z|)
+#(Intercept)                   -0.5108     0.7303  -0.699    0.484
+#metricdna                     -0.2776     0.9079  -0.306    0.760
+#group_idCB_Jan_17             -0.8755     1.0763  -0.813    0.416
+#group_idCB_Sep_15             18.0769  1978.0903   0.009    0.993
+#group_idCB_Sep_16             -1.2809     1.3038  -0.982    0.326
+#group_idGI_Jan_17             -1.0986     1.3166  -0.834    0.404
+#group_idMI_Jan_17              0.1054     1.1690   0.090    0.928
+#group_idMI_Sep_16             -1.6864     1.2824  -1.315    0.188
+#metricdna:group_idCB_Jan_17    0.8166     1.2990   0.629    0.530
+#metricdna:group_idCB_Sep_15  -19.2343  1978.0907  -0.010    0.992
+#metricdna:group_idCB_Sep_16    0.7701     1.5541   0.496    0.620
+#metricdna:group_idGI_Jan_17  -15.6790  1142.0518  -0.014    0.989
+#metricdna:group_idMI_Jan_17    0.2776     1.4402   0.193    0.847
+#metricdna:group_idMI_Sep_16   -0.4696     1.7286  -0.272    0.786
+#(Dispersion parameter for binomial family taken to be 1)
+#    Null deviance: 160.57  on 149  degrees of freedom
+#Residual deviance: 131.26  on 136  degrees of freedom
+#AIC: 159.26
+#Number of Fisher Scoring iterations: 16
+```
+
+There was a significant effect of time/space (group_id) on seabird detections. Note that is was GI, MI Sep 16 that drove these overall – being low detection values.
+
+```{r GLM Bird 2 --> detection ~ metric + group_id, eval=FALSE}
+
+#Relevel factors to double check significance terms
+levels(bird_master_test$group_id)
+bird_master_test$group_id <- factor(bird_master_test$group_id, levels = c("CB_Sep_15", "CB_Jan_16", "CB_Sep_16", "CB_Jan_17", "GI_Jan_17",  "LJP_Mar_17", "MI_Sep_16",  "MI_Jan_17"))
+
+bird_model_2 <- glm(detection ~ metric+group_id, family = binomial, data = bird_master_test)
+anova(bird_model_2, test = "Chisq")
+summary(bird_model_2)
+
+#Analysis of Deviance Table
+#Model: binomial, link: logit
+#Response: detection
+#Terms added sequentially (first to last)
+#         Df Deviance Resid. Df Resid. Dev Pr(>Chi)  
+#NULL                        99    114.611           
+#metric    1   0.2081        98    114.403   0.6483  
+#group_id  6  15.4554        92     98.948   0.0170 *
+
+#UPDATED SUMMARY CALL
+#Call:
+#glm(formula = detection ~ metric + group_id, family = binomial, data = bird_master_test)
+
+#Deviance Residuals: 
+#    Min       1Q   Median       3Q      Max  
+#-1.3474  -0.8822  -0.3923   0.9225   2.4029  
+
+#Coefficients:
+#                  Estimate Std. Error z value Pr(>|z|)   
+#(Intercept)         0.6342     0.7746   0.819  0.41290   
+#metricdna          -0.2431     0.4940  -0.492  0.62266   
+#group_idCB_Jan_16  -1.3039     0.9096  -1.433  0.15172   
+#group_idCB_Sep_16  -1.8162     0.9803  -1.853  0.06394 . 
+#group_idCB_Jan_17  -1.1339     0.8695  -1.304  0.19218   
+#group_idGI_Jan_17  -2.9167     1.2761  -2.286  0.02227 * 
+#group_idMI_Sep_16  -3.4638     1.2608  -2.747  0.00601 **
+#group_idMI_Jan_17  -0.9196     0.9765  -0.942  0.34631   
+#---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+#(Dispersion parameter for binomial family taken to be 1)
+
+#    Null deviance: 114.611  on 99  degrees of freedom
+#Residual deviance:  98.948  on 92  degrees of freedom
+#AIC: 114.95
+#Number of Fisher Scoring iterations: 5
+```
+
+```{r Bird model 2 checks, eval=FALSE}
+#Model 1b validation
+plot(bird_model_2)
+#Montague Island September 2016 were influential/outlier data points
+
+#Or:
+E2 <- resid(bird_model_2, type = "pearson")
+F2 <- fitted(bird_model_2)
+plot(x = F2, 
+     y = E2,
+     xlab = "Fitted values",
+     ylab = "Residuals")
+#Some fanning happening
+
+#Influential observations
+plot(bird_model_2, which = c(4)) #note some influential values
+
+par(mfrow=c(1,1))
+plot(cooks.distance(bird_model_2),
+     type = "h",
+     ylim = c(0,1))
+abline(h=1)
+
+#Normality
+hist(E2, breaks = 15)
+#Data are not normal
+
+#Independence:
+#For group id --> variance heterogeneous
+plot(x = bird_master_test$group_id, 
+     y = E2,
+     xlab = "Group ID",
+     ylab = "Residuals")
+
+#For method --> there is homogeneity of variance
+#plot(x = bird_master_test$method, 
+#     y = E2,
+#     xlab = "Group ID",
+#     ylab = "Residuals")
+
+#Per period:
+#xyplot(E2 ~ method | factor(group_id), 
+#       data = bird_master_test,
+#       panel = function(x,y){
+#         panel.points(x,y, col = 1, pch = 16, cex = 0.7)
+#         panel.loess(x,y, col = 1, lwd = 2)
+#         panel.abline(h=0)
+#       })
+
+#boxplot(E2 ~ Period, data = bird_master_test)
+```
+
+
+### PENGUIN MODELS
+
+The interaction term was not significant p > 0.25, so we will remove the interaction term.
+
+```{r GLM Penguin 1 ~ metric * location, eval=FALSE}
+#Penguin binomial GLMs for detection of birds ~ metric * sample group
+str(penguin_master_test)
+penguin_model_1 <- glm(detection ~ metric*group_id, family = binomial, data = penguin_master_test)
+anova(penguin_model_1, test = "Chisq")
+
+#Model: binomial, link: logit
+#Response: detection
+#Terms added sequentially (first to last)
+#                Df Deviance Resid. Df Resid. Dev Pr(>Chi)
+#NULL                               99     97.245         
+#metric           1   1.6403        98     95.604   0.2003
+#group_id         6   8.1254        92     87.479   0.2291
+#metric:group_id  6   6.2432        86     81.236   0.3965
+
+#Remove interaction term as p > 0.25
+```
+
+There was no significant effect of metric or time/space on the levels of detection of penguins within samples.
+
+```{r GLM Penguin 2 ~ metric + location, eval=FALSE}
+
+penguin_model_2 <- glm(detection ~ metric + group_id, family = binomial, data = penguin_master_test)
+anova(penguin_model_2, test = "Chisq")
+#summary(penguin_model_2)
+
+##UPDATE
+#         Df Deviance Resid. Df Resid. Dev Pr(>Chi)
+#NULL                        99     97.245         
+#metric    1   1.6403        98     95.604   0.2003
+#group_id  6   8.1254        92     87.479   0.2291
 
 ```
