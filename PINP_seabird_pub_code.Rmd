@@ -67,7 +67,7 @@ here::here()
 These dataframes are currently downloaded as .csv spreadsheets from the diet analysis master document found here: 
 [PINP Bird Data](https://docs.google.com/spreadsheets/d/1phfyo3kUyWZfwKF0IAHXgkxy23dbYs_tKkCfEIWeY8g/edit#gid=2115650924)
 
-**NOTE:** we want to clean this up and include the whole spreadsheet and read these in as tabs.
+**NOTE:** we could clean this up and include the whole spreadsheet and read these in as tabs.
 
 ```{r Load data}
 
@@ -93,7 +93,7 @@ otu_med_export <- read.csv(here("data/input_data/otu_med.csv"), header=TRUE)
 otu_high_export <- read.csv(here("data/input_data/otu_high.csv"), header=TRUE)
 
 #7 penguin haplotypes
-penguin_haplos_export <- read.csv(here("data/input_data/penguin_haplos.csv"), header=TRUE)
+penguin_haplos_export <- read.csv(here("data/input_data/penguin_haplos_use.csv"), header=TRUE)
 
 ```
 
@@ -344,8 +344,10 @@ penguin_haplos_sample = penguin_haplos %>%
   separate(sample_id, c("loc", "month", "year", "sample"))
 
 penguin_haplos_sample$sample <- as.factor(penguin_haplos_sample$sample)
-
-#output = penguin_haplos_sample
+penguin_haplos_sample$time_id <- as.factor(penguin_haplos_sample$time_id)
+#unique(penguin_haplos_sample$time_id)
+penguin_haplos_sample$time_id <- factor(penguin_haplos_sample$time_id, levels = c("Jan_16", "Jan_17", "Sep_16"),
+                                        labels = c("Jan'16", "Jan'17", "Sep'16"))
 
 ```
 
@@ -368,10 +370,9 @@ penguin_master <- rbind(penguin_med, penguin_high)
 
 ```
 
-```{r Data summaries by metric}
+Overall bird detection by method: need to summarise of all samples containing bird by method of detection. Need to scale to 100%.
 
-#Overall bird detection by method: need to summarise of all samples containing bird by method of detection
-#Need to scale to 100%
+```{r Data summaries by metric}
 
 # Bird master
 bird_sum_master <- ddply(bird_master, c("method", "metric"), summarise,
@@ -513,7 +514,35 @@ fig3a_bird <- ggplot(bird_sum_master, aes(x=metric, y=Detected, fill=metric)) +
                                         size=1))
 fig3a_bird
 
+fig3a_v2 = bird_sum_master %>%
+  filter(metric != "dna or hp") %>%
+  ggplot() +
+  geom_bar(aes(x=metric, y=Detected, fill=metric), stat="identity", position="dodge", width=1)+
+  ggtitle("a) Seabird detections by metric")+
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), 
+        plot.title=element_text(size=18), #face="bold", 
+        axis.title=element_blank(), #element_text(size=18)
+        axis.text=element_text(size=18), 
+        axis.text.x=element_blank(),
+        legend.text=element_text(size=16), 
+        legend.title=element_text(size=16), 
+        legend.position="bottom"
+        ) +
+  ylim(0,50)+
+  #theme(legend.position=c(0.60,0.80), legend.justification=c(0.4,0.5))+
+  scale_fill_manual(values=fig3.pal)+
+  guides(fill=FALSE) +
+  #guides(fill=guide_legend(title="Containing:"))+
+  #labs(x=NULL, y="Percentage of samples (%)") + #x="Metric", 
+  facet_grid(.~method, scales="free",space='free') +
+  theme(strip.text = element_text(size=rel(1.25)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+fig3a_v2
+
 #ggsave(here('figures/Final versions/fig3a_bird.jpeg'), plot = fig3a_bird, width = 9, height = 5, dpi = 300)
+#ggsave(here('figures/Final versions/fig3a_v2_bird.jpeg'), plot = fig3a_v2, width = 9, height = 5, dpi = 300)
 
 ```
 
@@ -558,7 +587,34 @@ fig3b_penguin <- ggplot(penguin_sum_master, aes(x=metric, y=Detected, fill=metri
                                         size=1))
 fig3b_penguin
 
+fig3b_v2 = penguin_sum_master %>%
+  filter(metric != "dna or hp") %>%
+  ggplot() +
+  geom_bar(aes(x=metric, y=Detected, fill=metric), stat="identity", position="dodge", width=1)+
+  ggtitle("b) Penguin detections by metric")+
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), 
+        plot.title=element_text(size=18), #face="bold", 
+        axis.title=element_blank(), #element_text(size=18)
+        axis.text=element_text(size=18), 
+        axis.text.x=element_blank(),
+        legend.text=element_text(size=16), 
+        legend.title=element_text(size=16), 
+        legend.position="bottom"
+        ) +
+  #theme(legend.position=c(0.60,0.80), legend.justification=c(0.4,0.5))+
+  ylim(0,50)+
+  scale_fill_manual(values=fig3.pal)+
+  guides(fill=guide_legend(title="Containing:"))+
+  labs(x=NULL, y="Percentage of samples (%)") + #x="Metric", 
+  facet_grid(.~method, scales="free",space='free') +
+  theme(strip.text = element_text(size=rel(1.25)), #face="bold", 
+        strip.background = element_rect(fill="lightgrey", colour="black",
+                                        size=1))
+fig3b_v2
+
 #ggsave(here('figures/Final versions/fig3b_penguin.jpeg'), plot = fig3b_penguin, width = 9, height = 5, dpi = 300)
+#ggsave(here('figures/Final versions/fig3b_v2_penguin.jpeg'), plot = fig3b_v2, width = 9, height = 5, dpi = 300)
 
 
 ```
@@ -575,7 +631,7 @@ y.grob <- textGrob("Percentage of samples (%)", gp=gpar(fontsize=18), rot=90) #f
 #x.grob <- textGrob("Percentage of samples containing remains (%)", gp=gpar(fontsize=18)) #fontface="bold", col="blue", 
 
 #combine using cowplot
-fig3_panel = plot_grid(fig3a_bird, fig3b_penguin, 
+fig3_panel = plot_grid(fig3a_v2, fig3b_v2, #fig3a_bird, fig3b_penguin, 
                        #align = "h",
                        nrow = 2
                           #labels = c("a) Seabirds", "b) Little penguins (Eudyptula minor)"), 
