@@ -138,7 +138,7 @@ hp_taxa = hp_taxa_export %>%
 #Rename factor levels
 hp_taxa$location <- factor(hp_taxa$location, 
                            levels = c("Cape Bridgewater", "Gabo Island", "Lady Julia Percy", "Montague Island"), 
-                           labels = c("Cape Bridgewater", "Gabo Island", "Deen Maar", "Barunguba"))
+                           labels = c("Cape Bridgewater", "GI", "DM", "Barunguba")) #"Gabo Island", "Deen Maar", 
 
 hp_taxa$time_id <- factor(hp_taxa$time_id, 
                           levels = c("Sep_15", "Jan_16", "Sep_16", "Jan_17", "Mar_17"), 
@@ -346,8 +346,9 @@ penguin_haplos_sample = penguin_haplos %>%
 penguin_haplos_sample$sample <- as.factor(penguin_haplos_sample$sample)
 penguin_haplos_sample$time_id <- as.factor(penguin_haplos_sample$time_id)
 #unique(penguin_haplos_sample$time_id)
-penguin_haplos_sample$time_id <- factor(penguin_haplos_sample$time_id, levels = c("Jan_16", "Jan_17", "Sep_16"),
-                                        labels = c("Jan'16", "Jan'17", "Sep'16"))
+penguin_haplos_sample$time_id <- factor(penguin_haplos_sample$time_id, levels = c("Jan_16", "Jan_17", "Sep_16"), labels = c("Jan'16", "Jan'17", "Sep'16"))
+
+penguin_haplos_sample$location <- factor(penguin_haplos_sample$location, levels = c("Cape Bridgewater", "Montague Island"), labels = c("Cape Bridgewater", "Barunguba"))
 
 ```
 
@@ -441,6 +442,8 @@ penguin_master_group = penguin_sum_group %>%
 ```{r OTU & HP master}
 
 #Need to join the penguin_med and penguin_high datasets for graphing
+#levels(hp_taxa$location)
+#levels(otu_metrics$location)
 
 otu_hp_master = otu_metrics %>%
   dplyr::rename(`Taxa` = `OTU`) %>%
@@ -494,12 +497,12 @@ fig3a_bird <- ggplot(bird_sum_master, aes(x=metric, y=Detected, fill=metric)) +
   ggtitle("a) Seabird detections by metric")+
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
-        plot.title=element_text(size=18), #face="bold", 
+        plot.title=element_text(size=20), #face="bold", 
         axis.title=element_blank(), #element_text(size=18)
-        axis.text=element_text(size=18), 
+        axis.text=element_text(size=20), 
         axis.text.x=element_blank(),
-        legend.text=element_text(size=16), 
-        legend.title=element_text(size=16), 
+        legend.text=element_text(size=20), 
+        legend.title=element_text(size=20), 
         legend.position="bottom"
         ) +
   ylim(0,50)+
@@ -521,12 +524,12 @@ fig3a_v2 = bird_sum_master %>%
   ggtitle("a) Seabird detections by metric")+
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
-        plot.title=element_text(size=18), #face="bold", 
+        plot.title=element_text(size=20), #face="bold", 
         axis.title=element_blank(), #element_text(size=18)
-        axis.text=element_text(size=18), 
+        axis.text=element_text(size=20), 
         axis.text.x=element_blank(),
-        legend.text=element_text(size=16), 
-        legend.title=element_text(size=16), 
+        legend.text=element_text(size=20), 
+        legend.title=element_text(size=20), 
         legend.position="bottom"
         ) +
   ylim(0,50)+
@@ -536,7 +539,7 @@ fig3a_v2 = bird_sum_master %>%
   #guides(fill=guide_legend(title="Containing:"))+
   #labs(x=NULL, y="Percentage of samples (%)") + #x="Metric", 
   facet_grid(.~method, scales="free",space='free') +
-  theme(strip.text = element_text(size=rel(1.25)), #face="bold", 
+  theme(strip.text = element_text(size=rel(1.75)), #face="bold", 
         strip.background = element_rect(fill="lightgrey", colour="black",
                                         size=1))
 fig3a_v2
@@ -594,12 +597,12 @@ fig3b_v2 = penguin_sum_master %>%
   ggtitle("b) Penguin detections by metric")+
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
-        plot.title=element_text(size=18), #face="bold", 
+        plot.title=element_text(size=20), #face="bold", 
         axis.title=element_blank(), #element_text(size=18)
-        axis.text=element_text(size=18), 
+        axis.text=element_text(size=20), 
         axis.text.x=element_blank(),
-        legend.text=element_text(size=16), 
-        legend.title=element_text(size=16), 
+        legend.text=element_text(size=20), 
+        legend.title=element_text(size=20), 
         legend.position="bottom"
         ) +
   #theme(legend.position=c(0.60,0.80), legend.justification=c(0.4,0.5))+
@@ -608,7 +611,7 @@ fig3b_v2 = penguin_sum_master %>%
   guides(fill=guide_legend(title="Containing:"))+
   labs(x=NULL, y="Percentage of samples (%)") + #x="Metric", 
   facet_grid(.~method, scales="free",space='free') +
-  theme(strip.text = element_text(size=rel(1.25)), #face="bold", 
+  theme(strip.text = element_text(size=rel(1.75)), #face="bold", 
         strip.background = element_rect(fill="lightgrey", colour="black",
                                         size=1))
 fig3b_v2
@@ -627,7 +630,7 @@ fig3b_v2
 #fig3a_bird & fig3b_penguin
 
 #create common axis titles
-y.grob <- textGrob("Percentage of samples (%)", gp=gpar(fontsize=18), rot=90) #fontface="bold", col="blue", 
+y.grob <- textGrob("Percentage of samples (%)", gp=gpar(fontsize=20), rot=90) #fontface="bold", col="blue", 
 #x.grob <- textGrob("Percentage of samples containing remains (%)", gp=gpar(fontsize=18)) #fontface="bold", col="blue", 
 
 #combine using cowplot
@@ -917,20 +920,20 @@ fig4a_hptaxa = otu_hp_master %>%
   theme_classic() + 
   theme(panel.grid.major = element_blank(), 
         axis.ticks = element_blank(),
-        plot.title=element_text(size=18), #face="bold", 
+        plot.title=element_text(size=28), #face="bold", 
         #axis.title.x=element_text(size=18), 
         axis.title.y=element_blank(),
-        axis.text=element_text(size=18),
+        axis.text=element_text(size=28),
         axis.text.x=element_blank(),
-        legend.text=element_text(size=18), 
-        legend.title=element_text(size=18)
+        legend.text=element_text(size=28), 
+        legend.title=element_text(size=28)
         ) + 
-  theme(legend.position=c(0.20,0.10), legend.justification=c(0.5,0.5)) +
+  theme(legend.position=c(0.50,0.10), legend.justification=c(0.5,0.5)) +
   scale_fill_manual(values=fig4a.pal, name="Taxa:") +
   labs(title ="a) Hard-part detections", y = "") + 
   #x="Individual sample & Sampling time", y="Presence of seabird remains in samples"
   facet_grid(location~., scales="free", space='free') +
-  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+  theme(strip.text = element_text(size=rel(2.5)), #face="bold", 
         strip.background = element_rect(fill="lightgrey", colour="black",
                                         size=1))
 
@@ -954,21 +957,21 @@ fig4b_dna_detect = otu_hp_master %>%
   theme_classic() + 
   theme(panel.grid.major = element_blank(), 
         axis.ticks = element_blank(),
-        plot.title=element_text(size=18), #face="bold", 
+        plot.title=element_text(size=28), #face="bold", 
         #axis.title.x=element_text(size=18), 
         axis.title.y=element_blank(),
-        axis.text=element_text(size=18), 
+        axis.text=element_text(size=28),
         axis.text.x=element_blank(),
-        legend.text=element_text(size=18), 
-        legend.title=element_text(size=18)
+        legend.text=element_text(size=28), 
+        legend.title=element_text(size=28)
         ) + 
-  theme(legend.position=c(0.20,0.10), legend.justification=c(0.5,0.5)) +
+  theme(legend.position=c(0.50,0.11), legend.justification=c(0.5,0.5)) +
   scale_fill_manual(values=fig4b.pal, name="Taxa:")+
   #guides(fill=guide_legend(title=))+
   labs(title ="b) DNA-based detections", y = "") + # Axis labels
   #, y="Presence of seabird remains in samples"
   facet_grid(location~., scales="free", space='free') +
-  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+  theme(strip.text = element_text(size=rel(2.5)), #face="bold", 
         strip.background = element_rect(fill="lightgrey", colour="black",
                                         size=1))
 fig4b_dna_detect
@@ -985,8 +988,8 @@ fig4b_dna_detect
 #fig4a_hptaxa and fig4b_dna_detect
 
 #create common axis titles
-y4.grob <- textGrob("Sample date: sample number", gp=gpar(fontsize=20), rot=90) #fontface="bold", col="blue", 
-x4.grob <- textGrob("Presence of seabird taxa in samples", gp=gpar(fontsize=20)) #fontface="bold", col="blue", 
+y4.grob <- textGrob("Sample date: sample number", gp=gpar(fontsize=28), rot=90) #fontface="bold", col="blue", 
+x4.grob <- textGrob("Presence of seabird taxa in samples", gp=gpar(fontsize=28)) #fontface="bold", col="blue", 
 
 #Combine plots
 fig4_panel_test=grid.arrange(fig4a_hptaxa, #+  theme(legend.position=c(0.5, 0.90) 
@@ -996,9 +999,11 @@ fig4_panel_test=grid.arrange(fig4a_hptaxa, #+  theme(legend.position=c(0.5, 0.90
 
 fig4_panel_ms = grid.arrange(arrangeGrob(fig4_panel_test, left = y4.grob, bottom = x4.grob, padding = unit(1, "line")))
 
-#ggsave("figures/Final versions/fig4_panel.pdf", plot = fig4_panel_ms, width = 20, height = 14, scale = 0.95, dpi = 300)
+ggsave("figures/Final versions/fig4_panel.pdf", plot = fig4_panel_ms, 
+       width = 20, height = 14, scale = 0.95, dpi = 300)
 
-#ggsave("figures/Final versions/fig4_panel.jpeg", plot = fig4_panel_ms, width = 20, height = 14, scale = 0.95, dpi = 300)
+ggsave("figures/Final versions/fig4_panel.jpeg", plot = fig4_panel_ms, 
+       width = 20, height = 14, scale = 0.95, dpi = 300)
 
 ```
 
@@ -1155,18 +1160,18 @@ fig7_haplo_presence = penguin_haplos_sample %>%
   theme_classic() + 
   theme(panel.grid.major = element_blank(), 
         axis.ticks.x = element_blank(),
-        plot.title=element_text(face="bold", size=18),
-        axis.title=element_text(size=18), 
-        axis.text.y =element_text(size=18), 
+        plot.title=element_text(face="bold", size=20),
+        axis.title=element_text(size=20), 
+        axis.text.y =element_text(size=20), 
         axis.text.x =element_blank(), 
-        legend.text=element_text(size=16), 
-        legend.title=element_text(size=16),
+        legend.text=element_text(size=20), 
+        legend.title=element_text(size=20),
         legend.position="top"
         ) + 
   scale_fill_manual(values=figS3.pal, name="Haplotype:")+
   labs(x="Sample date: sample number", y="Little penguin haplotypes & sequence abundance") + # Axis labels
   facet_grid(location~., scales="free", space='free') +
-  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+  theme(strip.text = element_text(size=rel(1.75)), #face="bold", 
         strip.background = element_rect(fill="lightgrey", colour="black",
                                         size=1))
 fig7_haplo_presence
