@@ -332,9 +332,10 @@ penguin_haplos = penguin_haplos_export %>%
                 haplo_2 = `SUM.of.haplo_2`, 
                 haplo_3 = `SUM.of.haplo_3`,
                 haplo_4 = `SUM.of.haplo_4`,
-                haplo_5 = `SUM.of.haplo_5`,
-                haplo_6 = `SUM.of.haplo_6`,
-                haplo_7 = `SUM.of.haplo_7`) %>%
+                haplo_5 = `SUM.of.haplo_5`#,
+                #haplo_6 = `SUM.of.haplo_6`,
+                #haplo_7 = `SUM.of.haplo_7`
+                ) %>%
   #Renamed columns
   reshape2::melt(id.vars=c("sample_id", "location_id", "location", "time_id", "group_id"), variable.name = "haplotype", value.name = "seq_abun") %>%
   mutate(seq_presence = if_else(seq_abun > 0, "1", "0")) %>%
@@ -460,7 +461,6 @@ otu_hp_master$sample <- as.factor(otu_hp_master$sample)
 otu_hp_master$detect <- as.integer(otu_hp_master$detect)
 
 ```
-
 
 
 ## MS Figures

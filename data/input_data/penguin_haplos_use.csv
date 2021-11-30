@@ -1,11 +1,11 @@
 sample_id,location,location_id,time,time_id,group_id,SUM of haplo_1,SUM of haplo_2,SUM of haplo_3,SUM of haplo_5,SUM of haplo_4,SUM of haplo_6,SUM of haplo_7
-CBW-1/16-7,Cape Bridgewater,CB,Jan-16,Jan_16,CB_Jan_16,5315,57,0,0,3,0,0
-CBW-1/17-10,Cape Bridgewater,CB,Jan-17,Jan_17,CB_Jan_17,0,0,0,0,151,0,0
-CBW-1/17-12,Cape Bridgewater,CB,Jan-17,Jan_17,CB_Jan_17,11,0,0,0,0,0,0
-CBW-9/16-11,Cape Bridgewater,CB,Sep-16,Sep_16,CB_Sep_16,2,0,0,0,0,0,0
-CBW-9/16-4,Cape Bridgewater,CB,Sep-16,Sep_16,CB_Sep_16,5,0,0,0,0,0,1
-CBW-9/16-5,Cape Bridgewater,CB,Sep-16,Sep_16,CB_Sep_16,5210,21,6,0,10,400,454
-CWB-1/17-17,Cape Bridgewater,CB,Jan-17,Jan_17,CB_Jan_17,2,0,14,0,0,0,0
-MI-1/17-5,Montague Island,MI,Jan-17,Jan_17,MI_Jan_17,4289,7,0,0,2,0,0
-MI-1/17-6,Montague Island,MI,Jan-17,Jan_17,MI_Jan_17,589,0,0,273,0,0,0
-MI-1/17-8,Montague Island,MI,Jan-17,Jan_17,MI_Jan_17,200,0,0,0,0,0,0
+CBW-1/16-7,Cape Bridgewater,CB,16-Jan,Jan_16,CB_Jan_16,5315,57,0,0,3,0,0
+CBW-1/17-10,Cape Bridgewater,CB,17-Jan,Jan_17,CB_Jan_17,0,0,0,0,151,0,0
+CBW-1/17-12,Cape Bridgewater,CB,17-Jan,Jan_17,CB_Jan_17,11,0,0,0,0,0,0
+CBW-9/16-11,Cape Bridgewater,CB,16-Sep,Sep_16,CB_Sep_16,2,0,0,0,0,0,0
+CBW-9/16-4,Cape Bridgewater,CB,16-Sep,Sep_16,CB_Sep_16,5,0,0,0,0,0,1
+CBW-9/16-5,Cape Bridgewater,CB,16-Sep,Sep_16,CB_Sep_16,5210,21,6,0,10,400,454
+CWB-1/17-17,Cape Bridgewater,CB,17-Jan,Jan_17,CB_Jan_17,2,0,14,0,0,0,0
+MI-1/17-5,Montague Island,MI,17-Jan,Jan_17,MI_Jan_17,4289,7,0,0,2,0,0
+MI-1/17-6,Montague Island,MI,17-Jan,Jan_17,MI_Jan_17,589,0,0,262,0,0,0
+MI-1/17-8,Montague Island,MI,17-Jan,Jan_17,MI_Jan_17,200,0,0,0,0,0,0
