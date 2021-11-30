@@ -1132,6 +1132,8 @@ figS2_otu_RRA
 
 ```
 
+### Haplotype figure 
+
 **- Figure 7** Little penguin haplotype diversity within samples containing DNA for little penguin (n = 10), using the primer for 12S rRNA gene. The genetic abundance of haplotypes identified is overlaid. Each haplotype within a sample represents an individual penguin consumed. 
 
 ```{r Figure 7 HAPLOTYPES PER SAMPLE, eval=FALSE}
@@ -1139,7 +1141,7 @@ figS2_otu_RRA
 #Little penguin haplotype presence in samples, including haplotype abundance data
 
 #Colour palette
-fig7.pal <- pnw_palette(8, name = "Sunset", type = "continuous")
+fig7.pal <- pnw_palette(5, name = "Sunset", type = "continuous")
 
 ## We want a graph displaying the proportional abundance of sequences per sample, with time on the x-axis and proportion on the y-axis
 ## Similar to my excel mock-up graph
@@ -1188,9 +1190,10 @@ fig7_haplo_presence
 
 #Here we want to make a bubble plot
 
-figS4_haplo_bubble = penguin_haplos %>%
+figS4_haplo_bubble = penguin_haplos_sample %>%
+  #penguin_haplos %>%
   filter(seq_abun > 1) %>%
-  ggplot(aes(x=time_id:sample_id, y=seq_presence, fill=haplotype, colour=haplotype, size=seq_abun)) + #, 
+  ggplot(aes(x=time_id:sample, y=seq_presence, fill=haplotype, colour=haplotype, size=seq_abun)) + #, 
   geom_point(position="stack") + 
   geom_text(aes(label=seq_abun, #rev(seq_abun) this appeared to completely reorder the seq data all over the graph
                 #vjust=0.5,
