@@ -1178,9 +1178,9 @@ fig7_haplo_presence = penguin_haplos_sample %>%
                                         size=1))
 fig7_haplo_presence
 
-ggsave(here('figures/Final versions/fig7_haplo_presence.pdf'), plot = fig7_haplo_presence, width = 10, height = 10, dpi = 300)
+ggsave(here('figures/Final versions/fig5_5haplo_presence.pdf'), plot = fig7_haplo_presence, width = 11, height = 10, dpi = 300)
 
-ggsave(here('figures/Final versions/fig7_haplo_presence.jpg'), plot = fig7_haplo_presence, width = 10, height = 10, dpi = 300)
+ggsave(here('figures/Final versions/fig5_5haplo_presence.jpg'), plot = fig7_haplo_presence, width = 11, height = 10, dpi = 300)
 
 ```
 
