@@ -35,7 +35,7 @@ Project objective: to compare the detection rates of birds in long-nose fur seal
 #Load
 library(tidyverse)
 library(tidyr)
-library(tidytext)
+#library(tidytext)
 #library(reshape)
 library(plyr)
 library(dplyr)
@@ -485,11 +485,11 @@ fig3.pal <- pnw_palette(5, name = "Bay", type = "continuous")
 
 #Relevel the method so that hard-part method comes first in the graph AND relabel
 #levels(bird_sum_master$method) #check levels
-bird_sum_master$method <- factor(bird_sum_master$method, levels = c("hard part", "DNA standard QC", "DNA stringent QC"), label = c("hard parts", "DNA (all)", "DNA (abundant)"))
+bird_sum_master$method <- factor(bird_sum_master$method, levels = c("hard part", "DNA standard QC", "DNA stringent QC"), label = c("hard-part", "DNA (all)", "DNA (abundant)"))
 
 #Relabel to clarify calculations
 #levels(bird_sum_master$metric) # check levels
-bird_sum_master$metric <- factor(bird_sum_master$metric, levels = c("hp", "dna", "dna_or_hp", "same_taxon"), label = c("hp", "dna", "dna or hp", "same taxon"))
+bird_sum_master$metric <- factor(bird_sum_master$metric, levels = c("hp", "dna", "dna_or_hp", "same_taxon"), label = c("HP", "DNA", "DNA or HP", "same taxon"))
 
 #Figure 3a
 fig3a_bird <- ggplot(bird_sum_master, aes(x=metric, y=Detected, fill=metric)) +
@@ -544,8 +544,8 @@ fig3a_v2 = bird_sum_master %>%
                                         size=1))
 fig3a_v2
 
-#ggsave(here('figures/Final versions/fig3a_bird.jpeg'), plot = fig3a_bird, width = 9, height = 5, dpi = 300)
-#ggsave(here('figures/Final versions/fig3a_v2_bird.jpeg'), plot = fig3a_v2, width = 9, height = 5, dpi = 300)
+ggsave(here('figures/Final versions/fig3a_bird.jpeg'), plot = fig3a_bird, width = 9, height = 5, dpi = 300)
+ggsave(here('figures/Final versions/fig3a_v2_bird.jpeg'), plot = fig3a_v2, width = 9, height = 5, dpi = 300)
 
 ```
 
@@ -556,14 +556,14 @@ fig3a_v2
 #Figure 3b
 
 #Relevel the method so that hard-part method comes first in the graph
-#levels(penguin_sum_master$method)
+#levels(as.factor(penguin_sum_master$method))
 penguin_sum_master$method <- factor(penguin_sum_master$method, levels = c("hard part", "DNA standard QC", "DNA stringent QC"))
 
 #Relabel to clarify
-penguin_sum_master$method <- factor(penguin_sum_master$method, levels = c("hard part", "DNA standard QC", "DNA stringent QC"), label = c("hard parts", "DNA (all)", "DNA (abundant)"))
+penguin_sum_master$method <- factor(penguin_sum_master$method, levels = c("hard part", "DNA standard QC", "DNA stringent QC"), label = c("hard-part", "DNA (all)", "DNA (abundant)"))
 
 #levels(penguin_sum_master$metric)
-penguin_sum_master$metric <- factor(penguin_sum_master$metric, levels = c("hp", "dna", "dna_or_hp", "same_taxon"), label = c("hp", "dna", "dna or hp", "same taxon"))
+penguin_sum_master$metric <- factor(penguin_sum_master$metric, levels = c("hp", "dna", "dna_or_hp", "same_taxon"), label = c("HP", "DNA", "DNA or HP", "same taxon"))
 
 #Figure 3b
 fig3b_penguin <- ggplot(penguin_sum_master, aes(x=metric, y=Detected, fill=metric)) +
@@ -616,8 +616,8 @@ fig3b_v2 = penguin_sum_master %>%
                                         size=1))
 fig3b_v2
 
-#ggsave(here('figures/Final versions/fig3b_penguin.jpeg'), plot = fig3b_penguin, width = 9, height = 5, dpi = 300)
-#ggsave(here('figures/Final versions/fig3b_v2_penguin.jpeg'), plot = fig3b_v2, width = 9, height = 5, dpi = 300)
+ggsave(here('figures/Final versions/fig3b_penguin.jpeg'), plot = fig3b_penguin, width = 9, height = 5, dpi = 300)
+ggsave(here('figures/Final versions/fig3b_v2_penguin.jpeg'), plot = fig3b_v2, width = 9, height = 5, dpi = 300)
 
 
 ```
@@ -650,9 +650,9 @@ fig3_panel = plot_grid(fig3a_v2, fig3b_v2, #fig3a_bird, fig3b_penguin,
 #add to plot
 fig3_panel_ms = grid.arrange(arrangeGrob(fig3_panel, left = y.grob, padding = unit(1, "line")))
 
-#ggsave(here("figures/Final versions/fig3_panel_ms.jpeg"), plot = fig3_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
+ggsave(here("figures/Final versions/fig3_panel_ms.jpeg"), plot = fig3_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
 
-#ggsave(here("figures/Final versions/fig3_panel_ms.pdf"), plot = fig3_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
+ggsave(here("figures/Final versions/fig3_panel_ms.pdf"), plot = fig3_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
 
 ```
 
@@ -1113,22 +1113,23 @@ figS2_otu_RRA = otu_rra %>%
   theme_classic() + 
   theme(panel.grid.major = element_blank(), 
         axis.ticks.y = element_blank(),
-        plot.title=element_text(face="bold", size=18),
-        axis.title=element_text(size=18), 
-        axis.text=element_text(size=18), 
-        legend.text=element_text(size=16), 
-        legend.title=element_text(size=16),
+        plot.title=element_text(face="bold", size=20),
+        axis.title=element_text(size=20), 
+        axis.text=element_text(size=20), 
+        legend.text=element_text(size=20), 
+        legend.title=element_text(size=20),
         legend.position="top"
         ) + 
   scale_fill_manual(values=fig4b.pal, name="Taxa:")+
-  labs(x="Sample date: sample number", y="Relative DNA abundance (%)") + # Axis labels
+  labs(x="Sample date: sample number", y="Relative DNA Sequence Abundance (%)") + # Axis labels
   facet_grid(location~., scales="free", space='free') +
-  theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
+  theme(strip.text = element_text(size=rel(2)), #face="bold", 
         strip.background = element_rect(fill="lightgrey", colour="black",
                                         size=1))
 figS2_otu_RRA
 
-#ggsave('figures/ESM/figS2_otu_RRA.pdf', plot = figS2_otu_RRA, width = 12, height = 12, dpi = 300)
+ggsave('figures/Final Versions/fig5_otu_RRA.pdf', plot = figS2_otu_RRA, width = 12, height = 12, dpi = 300)
+ggsave('figures/Final Versions/fig5_otu_RRA.jpeg', plot = figS2_otu_RRA, width = 12, height = 12, dpi = 300)
 
 ```
 
