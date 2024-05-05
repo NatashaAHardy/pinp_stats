@@ -98,7 +98,6 @@ penguin_haplos_export <- read.csv(here("data/input_data/penguin_haplos_use.csv")
 ```
 
 
-
 ## Data manipulations
 
 Here we mainly clean column or variable names, gather wide data and change to longform.
@@ -656,9 +655,9 @@ ggsave(here("figures/Final versions/fig3_panel_ms.pdf"), plot = fig3_panel_ms, w
 
 ```
 
-**- Figure 5a** depicts seabird percentage detections by location & time (using all DNA obtained through standard DNA QC)
+**- Figure S2a** depicts seabird percentage detections by location & time (using all DNA obtained through standard DNA QC)
 
-```{r Figure 5a - data manip, eval=FALSE}
+```{r Figure S2a - data manip, eval=FALSE}
 #Figure 5a
 #Colour palette
 fig5.pal <- pnw_palette(2, name = "Bay", type = "continuous")
@@ -669,7 +668,7 @@ bird_master_group2 = bird_master_group %>%
   filter(location != "Deen Maar")
 
 #Check & relevel factors as needed
-l#evels(bird_master_group2$location)
+#levels(bird_master_group2$location)
 bird_master_group2$location <- factor(bird_master_group2$location, 
                                       levels = c("Cape Bridgewater", "Gabo Island", "Deen Maar", "Barunguba"), 
                                       labels = c("Cape Bridgewater", "Gabo Isl.", "Deen Maar", "Barunguba"))  
@@ -677,9 +676,8 @@ bird_master_group2$location <- factor(bird_master_group2$location,
 #levels(bird_master_group2$time_id)
 ```
 
-```{r Figure 5a - Bird % detections / location, eval=FALSE}
-#Figure 5a
-fig5a_bird <- ggplot(bird_master_group2, aes(x=time_id, y=percentage_detected, fill=metric)) +
+```{r Figure S2a - Bird % detections / location, eval=FALSE}
+figS2a_bird <- ggplot(bird_master_group2, aes(x=time_id, y=percentage_detected, fill=metric)) +
   geom_bar(stat="identity",position="dodge")+
   coord_flip()+
   ylim(0,75)+
@@ -698,16 +696,15 @@ fig5a_bird <- ggplot(bird_master_group2, aes(x=time_id, y=percentage_detected, f
   theme(strip.text = element_text(size=rel(1.5)), #face="bold", 
         strip.background = element_rect(fill="lightgrey", colour="black",
                                         size=1))
-fig5a_bird
+figS2a_bird
 
-#ggsave(here('figures/Final versions/fig5a_bird_pdetect_location.jpeg'), plot = fig5a_bird, width = 8, height = 9, dpi = 300)
+ggsave(here('figures/ESM/figS2a_bird_pdetect_location.jpeg'), plot = figS2a_bird, width = 8, height = 9, dpi = 300)
 
 ```
 
-**- Figure 5b** depicts penguin percentage detections by location & time (using all DNA obtained through standard DNA QC)
+**- Figure S2b** depicts penguin percentage detections by location & time (using all DNA obtained through standard DNA QC)
 
-```{r Figure 5b Penguin % detections / location, eval = FALSE}
-#Figure 5b
+```{r Figure S2b Penguin % detections / location, eval = FALSE}
 #Need to exclude Deen Maar in percentages
 penguin_master_group2 = penguin_master_group %>%
   filter(location != "Deen Maar")
@@ -720,8 +717,8 @@ penguin_master_group2$location <- factor(penguin_master_group2$location,
 
 levels(penguin_master_group2$time_id)
 
-#Figure 5b
-fig5b_penguin <- ggplot(penguin_master_group2, aes(x=time_id, y=percentage_detected, fill=metric)) +
+#Figure S2b
+figS2b_penguin <- ggplot(penguin_master_group2, aes(x=time_id, y=percentage_detected, fill=metric)) +
   geom_bar(stat="identity",position="dodge")+
   coord_flip()+
   ylim(0,75)+
@@ -741,16 +738,16 @@ fig5b_penguin <- ggplot(penguin_master_group2, aes(x=time_id, y=percentage_detec
         strip.background = element_rect(fill="lightgrey", colour="black",
                                         size=1))
 
-fig5b_penguin
+figS2b_penguin
 
-#ggsave('figures/Final versions/fig5b_penguin_pdetect_location.jpeg', plot = fig5b_penguin, width = 8, height = 9, dpi = 300)
+ggsave('figures/ESM/figS2b_penguin_pdetect_location.jpeg', plot = figS2b_penguin, width = 8, height = 9, dpi = 300)
 
 
 ```
 
-**- Figure 5** Includes both pannels for a) seabird and b) penguin percentage detections at sampling sites and seasons.
+**- Figure S2** Includes both pannels for a) seabird and b) penguin percentage detections at sampling sites and seasons.
 
-```{r Figure 5 PANEL - location~time, eval = FALSE}
+```{r Figure S2 PANEL - location~time, eval = FALSE}
 
 #Merge the following plots into single panel plot
 #fig5a_bird & fig5b_penguin
@@ -760,7 +757,7 @@ y.grob <- textGrob("Sample date", gp=gpar(fontsize=18), rot=90) #fontface="bold"
 x.grob <- textGrob("Percentage of samples containing remains (%)", gp=gpar(fontsize=18)) #fontface="bold", col="blue", 
 
 #combine using cowplot
-bird_panel_ms = plot_grid(fig5a_bird, fig5b_penguin, 
+bird_panel_ms = plot_grid(figS2a_bird, figS2b_penguin, 
                            ncol = 2
                           #labels = c("a) Seabirds", "b) Little penguins (Eudyptula minor)"), 
                           #label_size = 18, ncol = 2, 
@@ -773,9 +770,9 @@ bird_panel_ms = plot_grid(fig5a_bird, fig5b_penguin,
 #add to plot
 bird_panel_ms = grid.arrange(arrangeGrob(bird_panel_ms, left = y.grob, bottom = x.grob, padding = unit(1, "line")))
 
-#ggsave(here("figures/Final versions/fig5_panel_ms.pdf"), plot = bird_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
+ggsave(here("figures/ESM/figS2_panel_ms.pdf"), plot = bird_panel_ms, width = 12, height = 10, scale = 0.95, dpi = 300)
 
-#ggsave(here("figures/Final versions/fig5_panel_ms.jpeg"), plot = bird_panel_ms, width = 10, height = 10, scale = 0.95, dpi = 300)
+ggsave(here("figures/ESM/figS2_panel_ms.jpeg"), plot = bird_panel_ms, width = 12, height = 10, scale = 0.95, dpi = 300)
 
 ```
 
@@ -785,7 +782,6 @@ bird_panel_ms = grid.arrange(arrangeGrob(bird_panel_ms, left = y.grob, bottom = 
 #Bird detections by location & time (standard DNA QC)
 #For use in ESM
 
-#Figure S2a
 figS3a_bird <- ggplot(bird_master_group2, aes(x=time_id, y=detected, fill=metric)) +
   geom_bar(stat="identity",position="dodge")+
   coord_flip()+
@@ -808,8 +804,7 @@ figS3a_bird <- ggplot(bird_master_group2, aes(x=time_id, y=detected, fill=metric
                                         size=1))
 figS3a_bird
 
-#ggsave('figures/ESM/figS3a_birddetect_location.jpeg', plot = figS3a_bird, width = 8, height = 10, dpi = 300)
-
+ggsave('figures/ESM/figS3a_birddetect_location.jpeg', plot = figS3a_bird, width = 8, height = 10, dpi = 300)
 
 ```
 
@@ -819,7 +814,6 @@ figS3a_bird
 #Penguin detections by location & time (standard DNA QC)
 #For ESM
 
-#Figure S3b
 figS3b_penguin <- ggplot(penguin_master_group2, aes(x=time_id, y=detected, fill=metric)) +
   geom_bar(stat="identity",position="dodge")+
   coord_flip()+
@@ -834,7 +828,8 @@ figS3b_penguin <- ggplot(penguin_master_group2, aes(x=time_id, y=detected, fill=
         legend.title=element_text(size=16), 
         ) + 
   #theme(axis.text.x=element_blank(), legend.position="top")+
-  theme(legend.position=c(0.75,0.38), legend.justification=c(0.4,0.5))+
+  #theme(legend.position=c(0.75,0.38), legend.justification=c(0.4,0.5))+
+  theme(legend.position=c(0.85,0.85), legend.justification=c(0.4,0.5))+
   scale_fill_manual(values=fig5.pal)+
   guides(fill=guide_legend(title="Metric:"))+
   #guides(fill=FALSE)+ #Remove legend for plotting alongside bird figure #guide_legend(title="Metric:")
@@ -846,8 +841,7 @@ figS3b_penguin <- ggplot(penguin_master_group2, aes(x=time_id, y=detected, fill=
   
 figS3b_penguin
 
-#ggsave('figures/ESM/figS3b_penguin_detect_location.jpeg', plot = figS3b_penguin, width = 8, height = 10, dpi = 300)
-
+ggsave('figures/ESM/figS3b_penguin_detect_location.jpeg', plot = figS3b_penguin, width = 8, height = 10, dpi = 300)
 
 ```
 
@@ -860,7 +854,7 @@ figS3b_penguin
 
 #create common axis titles
 yS1.grob <- textGrob("Sample date", gp=gpar(fontsize=18), rot=90) #fontface="bold", col="blue", 
-xS1.grob <- textGrob("Detections (number of samples containing remains)", gp=gpar(fontsize=18)) #fontface="bold", col="blue", 
+xS1.grob <- textGrob("Detections (number) of samples containing remains", gp=gpar(fontsize=18)) #fontface="bold", col="blue", 
 
 #combine using cowplot
 figS3_panel_esm = plot_grid(figS3a_bird, figS3b_penguin, 
@@ -869,15 +863,15 @@ figS3_panel_esm = plot_grid(figS3a_bird, figS3b_penguin,
 #add to plot
 bird_panel_esm = grid.arrange(arrangeGrob(figS3_panel_esm, left = yS1.grob, bottom = xS1.grob, padding = unit(1, "line")))
 
-#ggsave("figures/ESM/figS3_bird_panel_esm.pdf", plot = bird_panel_esm, width = 14, height = 12, scale = 0.95, dpi = 300)
+ggsave("figures/ESM/figS3_bird_panel.pdf", plot = bird_panel_esm, width = 12, height = 10, scale = 0.95, dpi = 300)
 
-#ggsave("figures/ESM/figS3_bird_panel_esm.jpeg", plot = bird_panel_esm, width = 14, height = 12, scale = 0.95, dpi = 300)
+ggsave("figures/ESM/figS3_bird_panel.jpeg", plot = bird_panel_esm, width = 12, height = 10, scale = 0.95, dpi = 300)
 
 ```
 
 ### OTU figures
 
-**- OTU palles** created to associated each taxon with a specific colour scheme throughout the OTU graphs.
+**- OTU pallettes** created to associated each taxon with a specific colour scheme throughout the OTU graphs.
 
 ```{r OTU Figure Palettes, eval = FALSE}
 
@@ -900,7 +894,23 @@ show_col(fig4a.pal)
 fig4b.pal <- c("#41476B", "#A86972", "#C67B6F", "#D89370", "#E6AB79")
 show_col(fig4b.pal)
 
+```
 
+```{r OTU Alternative colour palette}
+library(RColorBrewer)
+
+# Define the starting color
+start_color <- "#00496F"
+
+# Generate new color palettes with better differentiation and contrast
+fig4a.pal <- c(start_color, "red3", "#EDD746", "turquoise4") #"#00A08A"
+fig4b.pal <- c(start_color, "#DD4124", "#ED8B00", "#FFBE00", "#0F85A0")
+
+# Display the new color palettes
+print(fig4a.pal)
+show_col(fig4a.pal)
+print(fig4b.pal)
+show_col(fig4b.pal)
 
 ```
 
@@ -939,8 +949,7 @@ fig4a_hptaxa = otu_hp_master %>%
 
 fig4a_hptaxa
 
-#ggsave('figures/Final versions/fig4a_hptaxa_RRA_label.pdf', plot = fig4a_hptaxa, width = 12, height = 12, dpi = 300)
-
+ggsave('figures/Final versions/fig4a_hptaxa_RRA_label.pdf', plot = fig4a_hptaxa, width = 12, height = 12, dpi = 300)
 
 ```
 
@@ -976,7 +985,7 @@ fig4b_dna_detect = otu_hp_master %>%
                                         size=1))
 fig4b_dna_detect
 
-#ggsave('figures/Final versions/fig4b_dna_detect.pdf', plot = fig4b_dna_detect, width = 12, height = 12, dpi = 300)
+ggsave('figures/Final versions/fig4b_dna_detect.pdf', plot = fig4b_dna_detect, width = 12, height = 12, dpi = 300)
 
 ```
 
@@ -999,10 +1008,10 @@ fig4_panel_test=grid.arrange(fig4a_hptaxa, #+  theme(legend.position=c(0.5, 0.90
 
 fig4_panel_ms = grid.arrange(arrangeGrob(fig4_panel_test, left = y4.grob, bottom = x4.grob, padding = unit(1, "line")))
 
-ggsave("figures/Final versions/fig4_panel.pdf", plot = fig4_panel_ms, 
+ggsave("figures/Final versions/fig4_panel_v2.pdf", plot = fig4_panel_ms, 
        width = 20, height = 14, scale = 0.95, dpi = 300)
 
-ggsave("figures/Final versions/fig4_panel.jpeg", plot = fig4_panel_ms, 
+ggsave("figures/Final versions/fig4_panel_v2.jpeg", plot = fig4_panel_ms, 
        width = 20, height = 14, scale = 0.95, dpi = 300)
 
 ```
@@ -1044,9 +1053,10 @@ figS1_otu_abun = otu_hp_master %>%
 figS1_otu_abun
 
 #Save as jpeg
-#ggsave('figures/ESM/figS1_otu_abun.pdf', plot = figS1_otu_abun, width = 12, height = 12, dpi = 300)
+ggsave('figures/ESM/figS1_otu_abun.pdf', plot = figS1_otu_abun, width = 12, height = 12, dpi = 300)
 #In pdf:
 #Need to italicise a portion of species names
+ggsave('figures/ESM/figS1_otu_abun.jpeg', plot = figS1_otu_abun, width = 12, height = 12, dpi = 300)
 ```
 
 **- Figure SX** not included in MS or ESM - this was to illustrate the relative contribution of seabirds to each sample in relation to the DNA abundance recovered across the total.
@@ -1064,9 +1074,9 @@ figSX_otu_RRA <- otu_hp_master %>%
   theme_classic() + 
   theme(panel.grid.major = element_blank(), 
         axis.ticks.y = element_blank(),
-        plot.title=element_text(face="bold", size=18),
-        axis.title=element_text(size=18), 
-        axis.text=element_text(size=18), 
+        plot.title=element_text(face="bold", size=16),
+        axis.title=element_text(size=16), 
+        axis.text=element_text(size=16), 
         #axis.text.y=element_blank(),
         legend.text=element_text(size=16), 
         legend.title=element_text(size=16)#,
@@ -1083,13 +1093,14 @@ figSX_otu_RRA <- otu_hp_master %>%
                                         size=1))
 figSX_otu_RRA
 
-#ggsave('figures/ESM/figSX_otu_totalRA.pdf', plot = figSX_otu_RRA, width = 8, height = 12, dpi = 300)
+ggsave('figures/ESM/figSX_otu_totalRA.pdf', plot = figSX_otu_RRA, width = 8, height = 12, dpi = 300)
+ggsave('figures/ESM/figSX_otu_totalRA.jpeg', plot = figSX_otu_RRA, width = 8, height = 12, dpi = 300)
 
 ```
 
-**- Figure S2** to illustrate the proportional abundance of sequences per taxon per sample, also known as the relative rea abundance (Thomas & Deagle, et al. 2019). For ESM.
+**- Figure 5** to illustrate the proportional abundance of sequences per taxon per sample, also known as the relative rea abundance (Thomas & Deagle, et al. 2019). For ESM.
 
-```{r Figure S2 OTU Relative Read Abun by Total per Sample, eval = FALSE}
+```{r Figure 5 OTU Relative Read Abun by Total per Sample, eval = FALSE}
 
 ## We want a graph displaying the proportional abundance of sequences per sample, with time on the x-axis and proportion on the y-axis
 ## Similar to my excel mock-up graph
@@ -1106,7 +1117,7 @@ otu_rra$sample <- as.factor(otu_rra$sample)
 
 #Graph with tick labels or without
 
-figS2_otu_RRA = otu_rra %>%
+fig5_otu_RRA = otu_rra %>%
   ggplot() +
   geom_bar(aes(x=time_id:sample, y=prop_abun, fill=OTU), stat="identity")+
   coord_flip()+
@@ -1126,28 +1137,29 @@ figS2_otu_RRA = otu_rra %>%
   theme(strip.text = element_text(size=rel(2)), #face="bold", 
         strip.background = element_rect(fill="lightgrey", colour="black",
                                         size=1))
-figS2_otu_RRA
+fig5_otu_RRA
 
-ggsave('figures/Final Versions/fig5_otu_RRA.pdf', plot = figS2_otu_RRA, width = 12, height = 12, dpi = 300)
-ggsave('figures/Final Versions/fig5_otu_RRA.jpeg', plot = figS2_otu_RRA, width = 12, height = 12, dpi = 300)
+ggsave('figures/Final Versions/fig5_otu_RRAv2.pdf', plot = fig5_otu_RRA, width = 12, height = 12, dpi = 300)
+ggsave('figures/Final Versions/fig5_otu_RRAv2.jpeg', plot = fig5_otu_RRA, width = 12, height = 12, dpi = 300)
 
 ```
 
 ### Haplotype figure 
 
-**- Figure 7** Little penguin haplotype diversity within samples containing DNA for little penguin (n = 10), using the primer for 12S rRNA gene. The genetic abundance of haplotypes identified is overlaid. Each haplotype within a sample represents an individual penguin consumed. 
+**- Figure 6** Little penguin haplotype diversity within samples containing DNA for little penguin (n = 10), using the primer for 12S rRNA gene. The genetic abundance of haplotypes identified is overlaid. Each haplotype within a sample represents an individual penguin consumed. 
 
-```{r Figure 7 HAPLOTYPES PER SAMPLE, eval=FALSE}
+```{r Figure 6 HAPLOTYPES PER SAMPLE, eval=FALSE}
 
 #Little penguin haplotype presence in samples, including haplotype abundance data
 
 #Colour palette
-fig7.pal <- pnw_palette(5, name = "Sunset", type = "continuous")
-
+#fig7.pal <- pnw_palette(5, name = "Sunset", type = "continuous") #old
+#fig6.pal = c("#00496F", "#DD4124", "#ED8B00", "#FFBE00", "#0F85A0")
+fig6.pal = fig4b.pal 
 ## We want a graph displaying the proportional abundance of sequences per sample, with time on the x-axis and proportion on the y-axis
 ## Similar to my excel mock-up graph
 
-fig7_haplo_presence = penguin_haplos_sample %>%
+fig6_haplo_presence = penguin_haplos_sample %>%
   #penguin_haplos %>%
   filter(seq_abun > 1) %>%
   ggplot(aes(x=time_id:sample, y=seq_presence, fill=haplotype)) +
@@ -1171,23 +1183,23 @@ fig7_haplo_presence = penguin_haplos_sample %>%
         legend.title=element_text(size=20),
         legend.position="top"
         ) + 
-  scale_fill_manual(values=figS3.pal, name="Haplotype:")+
+  scale_fill_manual(values=fig6.pal, name="Haplotype:")+ #figS3.pal
   labs(x="Sample date: sample number", y="Little penguin haplotypes & sequence abundance") + # Axis labels
   facet_grid(location~., scales="free", space='free') +
   theme(strip.text = element_text(size=rel(1.75)), #face="bold", 
         strip.background = element_rect(fill="lightgrey", colour="black",
                                         size=1))
-fig7_haplo_presence
+fig6_haplo_presence
 
-ggsave(here('figures/Final versions/fig5_5haplo_presence.pdf'), plot = fig7_haplo_presence, width = 11, height = 10, dpi = 300)
+ggsave(here('figures/Final versions/fig6_5haplo_presencev2.pdf'), plot = fig6_haplo_presence, width = 11, height = 10, dpi = 300)
 
-ggsave(here('figures/Final versions/fig5_5haplo_presence.jpg'), plot = fig7_haplo_presence, width = 11, height = 10, dpi = 300)
+ggsave(here('figures/Final versions/fig6_5haplo_presencev2.jpg'), plot = fig6_haplo_presence, width = 11, height = 10, dpi = 300)
 
 ```
 
 **- Figure 7X** Extra graph - bubble graph version of above - Little penguin haplotype diversity within samples containing DNA for little penguin (n = 10), using the primer for 12S rRNA gene. The genetic abundance of haplotypes identified is overlaid. Each haplotype within a sample represents an individual penguin consumed. 
 
-```{r Figure 7 extra HAPLOTYPES Bubble Graph, eval=FALSE}
+```{r Figure 6 or S4 extra HAPLOTYPES Bubble Graph, eval=FALSE}
 
 #Here we want to make a bubble plot
 
@@ -1215,8 +1227,8 @@ figS4_haplo_bubble = penguin_haplos_sample %>%
         legend.text=element_text(size=16), 
         legend.title=element_text(size=16),
         legend.position="top") + 
-  scale_fill_manual(values=figS3.pal, name="Haplotype:")+
-  scale_colour_manual(values=figS3.pal, name="Haplotype:")+ 
+  scale_fill_manual(values=fig6.pal, name="Haplotype:")+ #figS3.pal
+  scale_colour_manual(values=fig6.pal, name="Haplotype:")+ #figS3.pal
   scale_size(range = c(12, 32),
              guide=FALSE) + 
   guides(colour = guide_legend(override.aes = list(size=10)))+
@@ -1227,7 +1239,7 @@ figS4_haplo_bubble = penguin_haplos_sample %>%
                                         size=1))
 figS4_haplo_bubble
 
-#ggsave(here('figures/ESM/figS4_haplo_bubble.pdf'), plot = figS4_haplo_bubble, width = 10, height = 10, dpi = 300)
+ggsave(here('figures/ESM/figS4_haplo_bubblev2.pdf'), plot = figS4_haplo_bubble, width = 10, height = 10, dpi = 300)
 
 ```
 
