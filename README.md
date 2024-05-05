@@ -6,7 +6,7 @@ Raw data publication:
 Sequencing data for seabird eDNA in long-nosed fur seal diets from southeastern Australia
 DOI: 10.5061/dryad.stqjq2cb3
 
-Natasha A. Hardy1, 2, 3*  Tina E. Berry4, 5 Michael Bunce6  Nathan Bott7  Will F. Figueira2  Rebecca R. McIntosh1*
+Natasha A. Hardy1,2,3*  Tina E. Berry4,5, Michael Bunce6,  Nathan Bott7,  Will F. Figueira2,  Rebecca R. McIntosh1*
 
 1 Department of Conservation, Phillip Island Nature Parks, Australia
 
